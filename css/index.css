@@ -1,0 +1,18 @@
+#map, html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+#panel {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 10px;
+}
+
+#delete-button {
+    margin-top: 5px;
+}
