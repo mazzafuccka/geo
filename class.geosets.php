@@ -33,6 +33,11 @@ class GeoSets extends DataBaseCustomData {
 	private static $jal_db_version = '1.0';
 
 	/**
+	 * @var string name content i18n localization domain
+	 */
+	private static $content = 'geoSets';
+
+	/**
 	 * points and data user save elements
 	 */
 	const DB_USERS_POINTS = 'geosets_user_points';
@@ -53,6 +58,8 @@ class GeoSets extends DataBaseCustomData {
 		if ( ! self::$initiated ) {
 			self::init_hooks();
 		}
+		// Hook for adding admin menus
+		add_action('admin_menu', array('GeoSets','geo_add_cabinet_pages'));
 	}
 
 	/**
@@ -62,7 +69,7 @@ class GeoSets extends DataBaseCustomData {
 	public static function plugin_activation() {
 		if ( version_compare( $GLOBALS['wp_version'], GEOSETS__MINIMUM_WP_VERSION, '<' ) ) {
 			$message = '<strong> Minimum version of wordpress v.' . GEOSETS__MINIMUM_WP_VERSION . '. Please upgrade wordpress for normal functionality plugin <strong>';
-			add_action( 'admin_notices', array( 'GeoSets', 'myAdminNotice', 10, array( $message, 'error' ) ) );
+			add_action( 'admin_notices', array( 'GeoSets', 'myAdminNotice') , 10, array( $message, 'error' ) );
 		} else {
 			// install db tables
 			GeoSets::jal_install();
@@ -86,6 +93,8 @@ class GeoSets extends DataBaseCustomData {
 
 	/**
 	 * Install databases structure
+	 * @internal dbDelta
+	 * @global $wpdb
 	 */
 	private static function jal_install() {
 		global $wpdb;
@@ -121,14 +130,34 @@ class GeoSets extends DataBaseCustomData {
 	 *
 	 * @param string $message
 	 * @param string $type type message 'error', 'update'
-	 * @param string $domain
 	 */
-	private static function myAdminNotice( $message, $type, $domain = 'geoSets' ) {
+	private static function myAdminNotice( $message, $type) {
+		$domain = self::$content;
 		?>
 		<div class="<?= $type; ?>">
 			<p><?php _e( $message, $domain ); ?></p>
 		</div>
 	<?php
+	}
+
+
+	/**
+	 * action function for menu hook
+	 */
+	public static function geo_add_cabinet_pages() {
+		$content  = 'geoSets';
+		add_menu_page(__('Edit Points', $content), __('Edit Points', $content), 'read', __FILE__, array('GeoSets', 'geo_toplevel_page'));
+	}
+
+	/**
+	 * view for cabinet top level page
+	 */
+	public static function geo_toplevel_page() {
+		global $current_user;
+		get_currentuserinfo();
+	   // todo page template
+	   echo __("Hello, ", GeoSets::$content). $current_user->display_name;
+		// table user points
 	}
 
 }
