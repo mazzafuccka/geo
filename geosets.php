@@ -32,15 +32,13 @@ if ( !function_exists( 'add_action' ) ) {
 }
 
 define( 'GEOSETS', '1.0' );
-define( 'GEOSETS__MINIMUM_WP_VERSION', '4.0' );
+define( 'GEOSETS__MINIMUM_WP_VERSION', '3.6' );
 define( 'GEOSETS__PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GEOSETS__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
+require_once( GEOSETS__PLUGIN_DIR . 'class.geosets.php' );
 register_activation_hook( __FILE__, array( 'GeoSets', 'plugin_activation' ) );
 register_deactivation_hook( __FILE__, array( 'GeoSets', 'plugin_deactivation' ) );
-
-require_once( GEOSETS__PLUGIN_DIR . 'class.geosets.php' );
-
 add_action( 'init', array( 'GeoSets', 'init' ) );
 
 // for admin page init

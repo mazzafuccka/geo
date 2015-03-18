@@ -51,6 +51,9 @@ class GeoSets {
 	 */
 	public static function plugin_activation() {
 		if ( version_compare( $GLOBALS['wp_version'], GEOSETS__MINIMUM_WP_VERSION, '<' ) ) {
+			$message = '<strong> Minimum version of wordpress v.' . GEOSETS__MINIMUM_WP_VERSION . '. Please upgrade wordpress for normal functionality plugin <strong>';
+			add_action( 'admin_notices', array( 'GeoSets', 'myAdminNotice', 10, array( $message, 'error' ) ) );
+		} else {
 			// install db tables
 			GeoSets::jal_install();
 		}
@@ -75,7 +78,6 @@ class GeoSets {
 	 * Install databases structure
 	 */
 	private static function jal_install() {
-
 		global $wpdb;
 		$jal_db_version = GeoSets::$jal_db_version;
 
@@ -102,6 +104,21 @@ class GeoSets {
 		dbDelta( $sql );
 
 		add_option( 'jal_db_version', $jal_db_version );
+	}
+
+	/**
+	 * admin error message
+	 *
+	 * @param string $message
+	 * @param string $type type message 'error', 'update'
+	 * @param string $domain
+	 */
+	private static function myAdminNotice( $message, $type, $domain = 'geoSets' ) {
+		?>
+		<div class="<?= $type; ?>">
+			<p><?php _e( $message, $domain ); ?></p>
+		</div>
+	<?php
 	}
 
 }
