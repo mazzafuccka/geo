@@ -2,12 +2,10 @@
 var drawManager;
 var currectShape;
 
-function clearSelection(e) {
+function clearSelection() {
   if (currectShape) {
     currectShape.setEditable(false);
     currectShape = null;
-  } else {
-    //deleteAllShapes(e);
   }
 }
 
@@ -16,11 +14,6 @@ function setSelection(shape) {
   currectShape = shape;
   shape.setEditable(true);
   alertCoord(currectShape);
-}
-
-function deleteAllShapes(e) {
-  //e.setMap(null);
-  drawManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
 }
 
 function deleteSelectedShape() {
@@ -57,7 +50,7 @@ function initialize() {
     fillOpacity: 0.45,
     editable: true
   };
-  // method driwing
+  // method drawing
   // https://developers.google.com/maps/documentation/javascript/overlays?csw=1#drawing_tools
   drawManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
