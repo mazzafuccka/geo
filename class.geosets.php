@@ -26,6 +26,16 @@ class GeoSets {
 	private static $initiated = false;
 
 	/**
+	 * @var string db custom version
+	 */
+	private static $jal_db_version = '1.0';
+
+	/**
+	 * points and data user save elements
+	 */
+	const DB_USERS_POINTS = 'geosets_user_points';
+
+	/**
 	 * Initialized plugin
 	 * @static
 	 */
@@ -40,7 +50,10 @@ class GeoSets {
 	 * @static
 	 */
 	public static function plugin_activation() {
-		//tidy up
+		if ( version_compare( $GLOBALS['wp_version'], GEOSETS__MINIMUM_WP_VERSION, '<' ) ) {
+			// install db tables
+			GeoSets::jal_install();
+		}
 	}
 
 	/**
@@ -56,6 +69,39 @@ class GeoSets {
 	 */
 	private static function init_hooks() {
 		self::$initiated = true;
+	}
+
+	/**
+	 * Install databases structure
+	 */
+	private static function jal_install() {
+
+		global $wpdb;
+		$jal_db_version = GeoSets::$jal_db_version;
+
+		$table_name = $wpdb->prefix . GeoSets::DB_USERS_POINTS;
+
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $table_name (
+		id int(11) NOT NULL AUTO_INCREMENT,
+		user_id int(11) NOT NULL COMMENT 'wp user id, fk wp_users',
+		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
+		start_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'start object activation',
+		end_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'stop object activation',
+		name tinytext NOT NULL COMMENT 'name object or poligon',
+		type varchar(64) NOT NULL COMMENT 'type of poligon',
+		points geometry NOT NULL COMMENT 'geo point of objects, poligons',
+		description text NOT NULL,
+		status tinyint(1) DEFAULT '0' COMMENT 'state, view or not views on map, active state',
+		UNIQUE KEY id (id),
+        INDEX (start_time, end_time),
+        INDEX (user_id)
+	) $charset_collate;";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+
+		add_option( 'jal_db_version', $jal_db_version );
 	}
 
 }
