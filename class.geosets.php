@@ -16,10 +16,12 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+require_once('class.database-custom-data.php');
+
 /**
  * Class GeoSetsAdmin
  */
-class GeoSets {
+class GeoSets extends DataBaseCustomData {
 	/**
 	 * @var bool state init plugin
 	 */
@@ -34,6 +36,14 @@ class GeoSets {
 	 * points and data user save elements
 	 */
 	const DB_USERS_POINTS = 'geosets_user_points';
+
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
+		parent::__construct(self::DB_USERS_POINTS);
+	}
 
 	/**
 	 * Initialized plugin
