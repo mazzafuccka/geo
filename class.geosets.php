@@ -83,7 +83,7 @@ class GeoSets {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$sql = "CREATE TABLE $table_name (
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
 		id int(11) NOT NULL AUTO_INCREMENT,
 		user_id int(11) NOT NULL COMMENT 'wp user id, fk wp_users',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
