@@ -108,7 +108,7 @@ abstract class DataBaseCustomData {
 	}
 
 	/**
-	 * Serach rows by user
+	 * Search rows by user
 	 * @param $user_id
 	 *
 	 * @return array
