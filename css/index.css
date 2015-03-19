@@ -1,7 +1,8 @@
-#map, html, body {
+#map {
     padding: 0;
     margin: 0;
-    height: 100%;
+    height: 500px;
+    width: 100%;
 }
 
 #panel {

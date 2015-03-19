@@ -61,6 +61,10 @@ class GeoSets extends DataBaseCustomData {
 		// Hook for adding admin menus
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
 		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
+		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
+
+		//js css
+		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
 	}
 
 	/**
@@ -163,12 +167,12 @@ class GeoSets extends DataBaseCustomData {
 		$content = self::CONTENT;
 
 		// List table
-		if( ! class_exists( 'GeoListTables' ) ) {
+		if ( ! class_exists( 'GeoListTables' ) ) {
 			require_once( 'class.geolist-tables.php' );
 		}
 		$db = new GeoSets();
 		// current user data points from DB
-		$data = $db->getByUserId($current_user->ID);
+		$data = $db->getByUserId( $current_user->ID );
 
 		?>
 		<!-- Шаблон -->
@@ -176,10 +180,10 @@ class GeoSets extends DataBaseCustomData {
 			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
 			<?php
 			$table = new GeoListTables();
-			$table->setData($data);
+			$table->setData( $data );
 			$table->prepare_items();
 			$table->display();
-		?>
+			?>
 		</div>
 
 	<?php
@@ -193,19 +197,37 @@ class GeoSets extends DataBaseCustomData {
 	 * add html wrapper code
 	 */
 	public static function geo_main_page_view_hook() {
+		$html = "
+		<!--content-->
+        <div id='map'></div>
+        <div id='panel'>
+            <div>
+                <button id='delete-button'>Delete</button>
+            </div>
+        </div>
+        ";
 
+		echo $html;
 	}
 
 	/**
 	 * method load require scripts
 	 */
-	private function load_scripts() {
+	public static function load_scripts() {
+		wp_register_script( 'gmaps-draw', '//maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing' );
 		wp_enqueue_script(
-			'custom-script',
-			get_stylesheet_directory_uri() . '/js/main.js',
-			array( 'jquery' )
+			'geo',
+			plugins_url( '/js/main.js', __FILE__ ),
+			array( 'jquery', 'gmaps-draw' )
 		);
-		add_action( 'wp_enqueue_scripts', 'my_scripts_method' );
+		self::load_styles();
+	}
+
+	/**
+	 * method load require css
+	 */
+	public static function load_styles() {
+		wp_enqueue_style( 'mainCss', plugins_url( '/css/index.css', __FILE__ ) );
 	}
 
 	/**
