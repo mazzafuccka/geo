@@ -217,7 +217,7 @@ class GeoSets extends DataBaseCustomData {
                 <label for='name'>" . __( 'Name', GeoSets::CONTENT ) . "</label>
                 <input type='text' value='' name='name' required/>
 
-                <input type='checkbox' value='' name='unlim' checked/>
+                <input type='checkbox' value='1' name='unlim' checked/>
                 <label for='unlim'>" . __( 'Unlimited time', GeoSets::CONTENT ) . "</label>
                 <br/>
 				<div class='dateTimeWrapper dateTimeWrapper-js'>
