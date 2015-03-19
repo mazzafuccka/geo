@@ -17,18 +17,26 @@
     visibility: hidden;
 }
 
-#delete-button {
+#panel #delete-button {
     margin-top: 5px;
 }
 
-div.actions {
+#panel div.actions {
     position: absolute;
     bottom: 1em;
     left: 1em;
 }
 
-.info{
+#panel .info {
     padding: 1.5em;
+}
+
+#panel label {
+    padding: 5px 0;
+    clear:both;
+}
+#panel .dateTimeWrapper {
+    display: none;
 }
 
 

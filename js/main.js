@@ -1,4 +1,4 @@
-/*global google */
+/*global $,google */
 var drawManager;
 var currectShape;
 
@@ -111,3 +111,46 @@ function initialize() {
   google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
 }
 google.maps.event.addDomListener(window, 'load', initialize);
+
+jQuery(function($){
+  var lang = null;//mapsData.lang
+  //datetime picker
+  $(function() {
+    $('#date_timepicker_start').datetimepicker({
+      format: 'd.m.Y H:i',
+      lang: lang ? lang : 'en',
+      onShow: function() {
+        var end = $('#date_timepicker_end');
+        this.setOptions({
+          maxDate: end.val() ? end.val() : false
+        })
+      },
+      timepicker: true
+    });
+    $('#date_timepicker_end').datetimepicker({
+      format: 'd.m.Y H:i',
+      lang: lang ? lang : 'en',
+      onShow: function() {
+        var start = $('#date_timepicker_start');
+        this.setOptions({
+          minDate: start.val() ? start.val() : false
+        })
+      },
+      timepicker: true
+    });
+  });
+
+  // toogle unlim
+  $('input[name="unlim"]').change(function(){
+    var block = $('.dateTimeWrapper-js');
+    if (!this.checked){
+      block.fadeIn('fast');
+    }
+    else {
+      block.fadeOut('fast');
+      // clean inputs
+      $('#date_timepicker_end').val('');
+      $('#date_timepicker_start').val('');
+    }
+  });
+});

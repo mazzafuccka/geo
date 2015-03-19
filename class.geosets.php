@@ -202,28 +202,33 @@ class GeoSets extends DataBaseCustomData {
         <div id='map'></div>
         <div id='panel'>
             <div class='info'>
-            <h2>" .__('Edit Object', GeoSets::CONTENT). "</h2>
+            <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>
             <!-- block edited information -->
             <form id='object_form'>
-                <label for='name'>" .__('Name', GeoSets::CONTENT). "</label>
+                <label for='name'>" . __( 'Name', GeoSets::CONTENT ) . "</label>
                 <input type='text' value='' name='name'/>
 
-                <label for='start_time'>" .__('Start time', GeoSets::CONTENT). "</label>
-                <input type='text' value='' datatimepicker='' name='start_time'/>
+                <input type='checkbox' value='' name='unlim' checked/>
+                <label for='unlim'>" . __( 'Unlimited time', GeoSets::CONTENT ) . "</label>
+                <br/>
+				<div class='dateTimeWrapper dateTimeWrapper-js'>
+					<label for='start_time'>" . __( 'Start time', GeoSets::CONTENT ) . "</label>
+	                <input type='text' value='' id='date_timepicker_start' name='start_time'/>
 
-                <label for='end_time'>" .__('End time', GeoSets::CONTENT). "</label>
-                <input type='text' value='' datatimepicker='' name='end_time'/>
+	                <label for='end_time'>" . __( 'End time', GeoSets::CONTENT ) . "</label>
+	                <input type='text' value='' id='date_timepicker_end' name='end_time'/>
+				</div>
 
-				<label for='description'>" .__('Description', GeoSets::CONTENT). "</label>
-                <input type='text' value='' name='description'/>
-
-                <label for='description'>" .__('Type object', GeoSets::CONTENT). "</label>
+                <label for='type'>" . __( 'Type object', GeoSets::CONTENT ) . "</label>
                 <input type='text' value='' name='type'/>
+
+				<label for='description'>" . __( 'Description', GeoSets::CONTENT ) . "</label>
+                <textarea name='description'></textarea>
             </form>
 			</div>
             <div class='actions'>
-           		<button id='save-button'>" .__('Save', GeoSets::CONTENT). "</button>
-                <button id='delete-button'>" .__('Delete', GeoSets::CONTENT). "</button>
+           		<button id='save-button'>" . __( 'Save', GeoSets::CONTENT ) . "</button>
+                <button id='delete-button'>" . __( 'Delete', GeoSets::CONTENT ) . "</button>
             </div>
         </div>
         ";
@@ -236,10 +241,11 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function load_scripts() {
 		wp_register_script( 'gmaps-draw', '//maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing' );
+		wp_register_script( 'datetime', plugins_url( '/js/vendor/jquery.datetimepicker.js', __FILE__ ) );
 		wp_enqueue_script(
 			'geo',
 			plugins_url( '/js/main.js', __FILE__ ),
-			array( 'jquery', 'gmaps-draw' )
+			array( 'jquery', 'gmaps-draw', 'datetime' )
 		);
 		self::load_styles();
 	}
@@ -249,6 +255,7 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function load_styles() {
 		wp_enqueue_style( 'mainCss', plugins_url( '/css/index.css', __FILE__ ) );
+		wp_enqueue_style( 'datetime', plugins_url( '/css/jquery.datetimepicker.css', __FILE__ ) );
 	}
 
 	/**
