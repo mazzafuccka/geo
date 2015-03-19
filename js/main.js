@@ -1,4 +1,4 @@
-/*global alert,google */
+/*global google */
 var drawManager;
 var currectShape;
 
@@ -13,7 +13,6 @@ function setSelection(shape) {
   clearSelection(shape);
   currectShape = shape;
   shape.setEditable(true);
-  alertCoord(currectShape);
 }
 
 function deleteSelectedShape() {
@@ -24,7 +23,7 @@ function deleteSelectedShape() {
   }
 }
 
-function alertCoord(currectShape) {
+function getCoord(currectShape) {
   var vertices = currectShape.getPath();
   var result = [];
   for (var i = 0; i < vertices.getLength(); i++) {
@@ -32,7 +31,9 @@ function alertCoord(currectShape) {
     var point = [xy.lat(), xy.lng()];
     result.push(point);
   }
-  alert(result);
+  console.log(result);
+
+  return result;
 }
 
 function initialize() {
@@ -69,11 +70,9 @@ function initialize() {
       position: google.maps.ControlPosition.TOP_CENTER,
       // types object on panel
       drawingModes: [
-        //google.maps.drawing.OverlayType.MARKER,
-        //google.maps.drawing.OverlayType.CIRCLE,
-        //google.maps.drawing.OverlayType.POLYGON,
-        //google.maps.drawing.OverlayType.POLYLINE,
-        //google.maps.drawing.OverlayType.RECTANGLE
+        google.maps.drawing.OverlayType.CIRCLE,
+        google.maps.drawing.OverlayType.POLYGON,
+        google.maps.drawing.OverlayType.RECTANGLE
       ]
     }
   });
