@@ -206,7 +206,6 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_main_page_view_hook() {
 		global $current_user;
-		$user = get_currentuserinfo();
 		$html = "
 		<!--content-->
         <div id='map'></div>
@@ -304,7 +303,7 @@ class GeoSets extends DataBaseCustomData {
 
 					$data     = $this->_prepare_data( $_POST, $current_user );
 					$response = new WP_Ajax_Response;
-					//todo
+					//todo add actions for delete und update user points
 					switch ( $actionType ) {
 						case 'new':
 							if ( ! empty( $data ) && is_array( $data ) ) {
