@@ -146,7 +146,7 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_add_cabinet_pages() {
 		$content  = 'geoSets';
-		add_menu_page(__('Edit Points', $content), __('Edit Points', $content), 'read', __FILE__, array('GeoSets', 'geo_toplevel_page'));
+		add_menu_page(__('List Points', $content), __('List Points', $content), 'read', __FILE__, array('GeoSets', 'geo_toplevel_page'));
 	}
 
 	/**
