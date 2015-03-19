@@ -7,7 +7,7 @@ Description: Geo positions plugins interfaces
 Version: 1.0
 Author: drdim
 Author URI: https://github.com/drdim
-License: GPL2
+License: GPLv2 or later
 */
 /*  Copyright 2015 drdim (email: dr.dim.pro@gmail.com)
 
