@@ -88,4 +88,40 @@ abstract class DataBaseCustomData {
 
 		return $deleted;
 	}
+
+	/**
+	 * Get by id
+	 * @param $id
+	 *
+	 * @return array
+	 */
+	public function getById ($id){
+		global $wpdb;
+
+		if(!empty($id))
+		{
+			$sql = $wpdb->prepare('SELECT * FROM '.$this->tableName.' WHERE id = %d', $id);
+			return $wpdb->get_results($sql, ARRAY_A);
+		}
+
+		return array();
+	}
+
+	/**
+	 * Serach rows by user
+	 * @param $user_id
+	 *
+	 * @return array
+	 */
+	public function getByUserId ($user_id){
+		global $wpdb;
+
+		if(!empty($user_id))
+		{
+			$sql = $wpdb->prepare('SELECT * FROM '.$this->tableName.' WHERE user_id = %d', $user_id);
+			return $wpdb->get_results($sql, ARRAY_A);
+		}
+
+		return array();
+	}
 }

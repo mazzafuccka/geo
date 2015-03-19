@@ -16,7 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-require_once('class.database-custom-data.php');
+require_once( 'class.database-custom-data.php' );
 
 /**
  * Class GeoSetsAdmin
@@ -33,9 +33,9 @@ class GeoSets extends DataBaseCustomData {
 	private static $jal_db_version = '1.0';
 
 	/**
-	 * @var string name content i18n localization domain
+	 * name content i18n localization domain
 	 */
-	private static $content = 'geoSets';
+	const CONTENT = 'geoSets';
 
 	/**
 	 * points and data user save elements
@@ -45,9 +45,9 @@ class GeoSets extends DataBaseCustomData {
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
-		parent::__construct(self::DB_USERS_POINTS);
+	public function __construct() {
+		global $wpdb;
+		parent::__construct( $wpdb->prefix . GeoSets::DB_USERS_POINTS );
 	}
 
 	/**
@@ -59,7 +59,8 @@ class GeoSets extends DataBaseCustomData {
 			self::init_hooks();
 		}
 		// Hook for adding admin menus
-		add_action('admin_menu', array('GeoSets','geo_add_cabinet_pages'));
+		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
+		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 	}
 
 	/**
@@ -69,7 +70,7 @@ class GeoSets extends DataBaseCustomData {
 	public static function plugin_activation() {
 		if ( version_compare( $GLOBALS['wp_version'], GEOSETS__MINIMUM_WP_VERSION, '<' ) ) {
 			$message = '<strong> Minimum version of wordpress v.' . GEOSETS__MINIMUM_WP_VERSION . '. Please upgrade wordpress for normal functionality plugin <strong>';
-			add_action( 'admin_notices', array( 'GeoSets', 'myAdminNotice') , 10, array( $message, 'error' ) );
+			add_action( 'admin_notices', array( 'GeoSets', 'myAdminNotice' ), 10, array( $message, 'error' ) );
 		} else {
 			// install db tables
 			GeoSets::jal_install();
@@ -131,8 +132,8 @@ class GeoSets extends DataBaseCustomData {
 	 * @param string $message
 	 * @param string $type type message 'error', 'update'
 	 */
-	private static function myAdminNotice( $message, $type) {
-		$domain = self::$content;
+	private static function myAdminNotice( $message, $type ) {
+		$domain = self::CONTENT;
 		?>
 		<div class="<?= $type; ?>">
 			<p><?php _e( $message, $domain ); ?></p>
@@ -145,8 +146,11 @@ class GeoSets extends DataBaseCustomData {
 	 * action function for menu hook
 	 */
 	public static function geo_add_cabinet_pages() {
-		$content  = 'geoSets';
-		add_menu_page(__('List Points', $content), __('List Points', $content), 'read', __FILE__, array('GeoSets', 'geo_toplevel_page'), 'dashicons-location');
+		$content = self::CONTENT;
+		add_menu_page( __( 'List Points', $content ), __( 'List Points', $content ), 'read', __FILE__, array(
+			'GeoSets',
+			'geo_toplevel_page'
+		), 'dashicons-location' );
 	}
 
 	/**
@@ -155,9 +159,61 @@ class GeoSets extends DataBaseCustomData {
 	public static function geo_toplevel_page() {
 		global $current_user;
 		get_currentuserinfo();
-	   // todo page template
-	   echo __("Hello, ", GeoSets::$content). $current_user->display_name;
 		// table user points
+		$content = self::CONTENT;
+
+		// List table
+		if( ! class_exists( 'GeoListTables' ) ) {
+			require_once( 'class.geolist-tables.php' );
+		}
+		$db = new GeoSets();
+		// current user data points from DB
+		$data = $db->getByUserId($current_user->ID);
+
+		?>
+		<!-- Шаблон -->
+		<div class="wrapper">
+			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
+			<?php
+			$table = new GeoListTables();
+			$table->setData($data);
+			$table->prepare_items();
+			$table->display();
+		?>
+		</div>
+
+	<?php
 	}
 
+	/**
+	 * Main page view google maps + operations to add, edit points on main page
+	 * add js work files to load
+	 * add js core files google map to load
+	 * add css styles to load
+	 * add html wrapper code
+	 */
+	public static function geo_main_page_view_hook() {
+
+	}
+
+	/**
+	 * method load require scripts
+	 */
+	private function load_scripts() {
+		wp_enqueue_script(
+			'custom-script',
+			get_stylesheet_directory_uri() . '/js/main.js',
+			array( 'jquery' )
+		);
+		add_action( 'wp_enqueue_scripts', 'my_scripts_method' );
+	}
+
+	/**
+	 * Load plugin textdomain.
+	 *
+	 * @since 1.0.0
+	 */
+	function geo_load_textdomain() {
+		load_plugin_textdomain( 'geoSets', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	}
 }

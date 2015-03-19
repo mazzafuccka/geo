@@ -15,7 +15,7 @@ Geo plugin for sets poligons and geoobjects on google map
 
 1. Upload folder `geoSets` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('map_view_main_hook'); ?>` in your templates
+1. Place `<?php do_action(array('GeoSets','geo_main_page_view_hook')); ?>` in your templates
 
 == Changelog ==
 
