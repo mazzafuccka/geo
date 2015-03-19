@@ -6,6 +6,7 @@ function clearSelection() {
   if (currectShape) {
     currectShape.setEditable(false);
     currectShape = null;
+    hidePanel();
   }
 }
 
@@ -13,6 +14,17 @@ function setSelection(shape) {
   clearSelection(shape);
   currectShape = shape;
   shape.setEditable(true);
+  showPanel();
+}
+
+function showPanel(){
+  var panel = document.getElementById('panel');
+  panel.style.visibility = 'visible';
+}
+
+function hidePanel(){
+  var panel = document.getElementById('panel');
+  panel.style.visibility = 'hidden';
 }
 
 function deleteSelectedShape() {
@@ -20,6 +32,7 @@ function deleteSelectedShape() {
     currectShape.setMap(null);
     currectShape = null;
     drawManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+    hidePanel();
   }
 }
 

@@ -201,8 +201,29 @@ class GeoSets extends DataBaseCustomData {
 		<!--content-->
         <div id='map'></div>
         <div id='panel'>
-            <div>
-                <button id='delete-button'>Delete</button>
+            <div class='info'>
+            <h2>" .__('Edit Object', GeoSets::CONTENT). "</h2>
+            <!-- block edited information -->
+            <form id='object_form'>
+                <label for='name'>" .__('Name', GeoSets::CONTENT). "</label>
+                <input type='text' value='' name='name'/>
+
+                <label for='start_time'>" .__('Start time', GeoSets::CONTENT). "</label>
+                <input type='text' value='' datatimepicker='' name='start_time'/>
+
+                <label for='end_time'>" .__('End time', GeoSets::CONTENT). "</label>
+                <input type='text' value='' datatimepicker='' name='end_time'/>
+
+				<label for='description'>" .__('Description', GeoSets::CONTENT). "</label>
+                <input type='text' value='' name='description'/>
+
+                <label for='description'>" .__('Type object', GeoSets::CONTENT). "</label>
+                <input type='text' value='' name='type'/>
+            </form>
+			</div>
+            <div class='actions'>
+           		<button id='save-button'>" .__('Save', GeoSets::CONTENT). "</button>
+                <button id='delete-button'>" .__('Delete', GeoSets::CONTENT). "</button>
             </div>
         </div>
         ";

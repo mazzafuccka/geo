@@ -9,11 +9,26 @@
     font-family: Arial, sans-serif;
     font-size: 13px;
     position: absolute;
-    top: 0;
+    top: 1em;
     right: 0;
-    margin: 10px;
+    height: 520px;
+    background-color: white;
+    width: 300px;
+    visibility: hidden;
 }
 
 #delete-button {
     margin-top: 5px;
 }
+
+div.actions {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+}
+
+.info{
+    padding: 1.5em;
+}
+
+
