@@ -54,8 +54,8 @@ abstract class DataBaseCustomData {
 		$columns = $valuesType = $values = array();
 		foreach ( $data as $key => $row ) {
 			if ( $key === 'points' ) {
-				$columns[] = $key;
-				$valuesType[]  = "GeomFromText('" . $row . "')";
+				$columns[]    = $key;
+				$valuesType[] = "GeomFromText('" . $row . "')";
 			} else {
 				$columns[]    = $key;
 				$values[]     = $row;
@@ -73,8 +73,6 @@ abstract class DataBaseCustomData {
 			$values
 		);
 		$wpdb->query( $sql );
-
-//		$wpdb->insert( $this->tableName, $data );
 
 		return $wpdb->insert_id;
 	}
@@ -144,7 +142,18 @@ abstract class DataBaseCustomData {
 		global $wpdb;
 
 		if ( ! empty( $user_id ) ) {
-			$sql = $wpdb->prepare( 'SELECT * FROM ' . $this->tableName . ' WHERE user_id = %d', $user_id );
+			$sql = $wpdb->prepare( 'SELECT
+				id,
+				user_id,
+				name,
+				modify_time,
+				start_time,
+				end_time,
+				AsText(points) as points,
+				description,
+				type,
+				status
+ 			FROM ' . $this->tableName . ' WHERE user_id = %d', $user_id );
 
 			return $wpdb->get_results( $sql, ARRAY_A );
 		}
