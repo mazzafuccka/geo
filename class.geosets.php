@@ -71,9 +71,10 @@ class GeoSets extends DataBaseCustomData {
 		//js css
 		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
 
-		//ajax wp_ajax_nopriv
+		//ajax
 		add_action( 'wp_ajax_new_action', array( 'geoSets', 'new_action' ) );
-//		add_action( 'wp_ajax_nopriv_new_action', array( 'geoSets', 'new_action' ) );
+		add_action( 'wp_ajax_delete_action', array( 'geoSets', 'delete_action' ) );
+		add_action( 'wp_ajax_edit_action', array( 'geoSets', 'edit_action' ) );
 	}
 
 	/**
@@ -169,13 +170,13 @@ class GeoSets extends DataBaseCustomData {
 	/**
 	 * user points
 	 */
-	public static function get_user_data(){
+	public static function get_user_data() {
 		global $current_user;
 		$db = new GeoSets();
 		// current user data points from DB
-		$data = $db->getByUserId( $current_user->ID, true);
-		$data = self::loadGeoJson($data);
-		echo '<script> var user_points ='.json_encode($data).'</script>';
+		$data = $db->getByUserId( $current_user->ID, true );
+		$data = self::loadGeoJson( $data );
+		echo '<script> var user_points =' . json_encode( $data ) . '</script>';
 	}
 
 	/**
@@ -325,14 +326,14 @@ class GeoSets extends DataBaseCustomData {
 								if ( $res ) {
 									$response = array(
 										'error'  => array(),
-										'action' => 'new',
+										'action' => 'new_action',
 										'state'  => 'success',
 										'data'   => $res
 									);
 								} else {
 									$response = array(
 										'error'  => array( 'Point not create' ),
-										'action' => 'new',
+										'action' => 'new_action',
 										'state'  => 'error',
 										'data'   => $res
 									);
@@ -340,8 +341,44 @@ class GeoSets extends DataBaseCustomData {
 							}
 							break;
 						case 'edit_action':
+							if ( ! empty( $data ) && is_array( $data ) ) {
+								$res = $db->update( $data );
+								if ( $res ) {
+									$response = array(
+										'error'  => array(),
+										'action' => 'edit_action',
+										'state'  => 'success',
+										'data'   => $res
+									);
+								} else {
+									$response = array(
+										'error'  => array( 'Point not create' ),
+										'action' => 'edit_action',
+										'state'  => 'error',
+										'data'   => $res
+									);
+								}
+							}
 							break;
 						case 'delete_action':
+							if ( ! empty( $data ) && is_array( $data ) ) {
+								$res = $db->delete( $data );
+								if ( $res ) {
+									$response = array(
+										'error'  => array(),
+										'action' => 'delete_action',
+										'state'  => 'success',
+										'data'   => $res
+									);
+								} else {
+									$response = array(
+										'error'  => array( 'Point not delete' ),
+										'action' => 'delete_action',
+										'state'  => 'error',
+										'data'   => $res
+									);
+								}
+							}
 							break;
 					}
 
@@ -366,7 +403,7 @@ class GeoSets extends DataBaseCustomData {
 		$removeData = array( 'token', 'id', 'unlim', 'action', '_wp_http_referer', 'type_object' );
 		foreach ( $input as $name => $value ) {
 			if ( ! in_array( $name, $removeData ) ) {
-				if ( ( $name == 'start_time' || $name == 'end_time' ) && (!isset($input['unlim']) || $input['unlim'] == '0') && ! empty( $value ) ) {
+				if ( ( $name == 'start_time' || $name == 'end_time' ) && ( ! isset( $input['unlim'] ) || $input['unlim'] == '0' ) && ! empty( $value ) ) {
 					//todo date
 					$mysql_date_string = date_create( $value )->format( 'Y-m-d H:i:s' ); //mysql format
 					$result[ $name ]   = $mysql_date_string;
@@ -426,10 +463,25 @@ class GeoSets extends DataBaseCustomData {
 
 	/**
 	 * set db data to loadGeoJson google format
+	 *
 	 * @param $data
 	 */
-	public static function loadGeoJson($data){
+	public static function loadGeoJson( $data ) {
 		//todo
 		return $data;
+	}
+
+	/**
+	 * delete action
+	 */
+	public static function delete_action() {
+		self::new_action();
+	}
+
+	/**
+	 * edit action
+	 */
+	public static function edit_action() {
+		self::new_action();
 	}
 }

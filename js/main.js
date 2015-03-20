@@ -137,7 +137,6 @@ jQuery(function($) {
     google.maps.event.addListener(map, 'click', clearSelection);
     // delete elements, clear map
     google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
-    //console.log(user_points);
 
     /* Load poligons from user save data*/
     var newPolys = [];
@@ -145,12 +144,9 @@ jQuery(function($) {
     for (var inc = 0, ii = user_points.length; inc < ii; inc++) {
       var newCoords = [];
       var point = convertCoord(user_points[inc].points);
-      //console.log(user_points[inc].points);
-      //console.log(point);
       var objects = point.split(',');
       for (var i = 0; i < objects.length; i++) {
         var coord = objects[i].split(' ');
-        console.log(coord);
         newCoords.push(new google.maps.LatLng(coord[0], coord[1]));
       }
 
@@ -245,8 +241,10 @@ jQuery(function($) {
   // ajax remove
   $('#delete-button').click(function() {
     //ajax
-    var data = $('#object_form').serialize();
-    $.post(ajax_object.ajax_url, data, function(response) {
+    var form = $('#object_form');
+    // set form delete action
+    form.find('input[name="action"]').val('delete_action');
+    $.post(ajax_object.ajax_url, form.serialize(), function(response) {
       // todo check for errors
       if (response.state == 'success' && !response.error.length > 0) {
         hidePanel();
