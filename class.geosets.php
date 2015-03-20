@@ -72,7 +72,7 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
 
 		//ajax wp_ajax_nopriv
-		add_action( 'wp_ajax_point_edit', array( 'geoSets', 'geo_ajax_point_edit' ) );
+		add_action( 'wp_ajax_nopriv_point_edit', array( 'geoSets', 'geo_ajax_point_edit' ) );
 	}
 
 	/**

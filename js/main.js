@@ -51,7 +51,6 @@ jQuery(function($){
       var point = [xy.lat(), xy.lng()];
       result.push(point);
     }
-    console.log(result);
 
     return result;
   }
@@ -90,23 +89,36 @@ jQuery(function($){
         position: google.maps.ControlPosition.TOP_CENTER,
         // types object on panel
         drawingModes: [
-          google.maps.drawing.OverlayType.CIRCLE,
-          google.maps.drawing.OverlayType.POLYGON,
-          google.maps.drawing.OverlayType.RECTANGLE
+          //google.maps.drawing.OverlayType.CIRCLE,
+          google.maps.drawing.OverlayType.POLYGON
+          //google.maps.drawing.OverlayType.RECTANGLE
         ]
       }
     });
 
+    // poligon draw complete
     google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
-      if (e.type != google.maps.drawing.OverlayType.MARKER) {
-        drawManager.setDrawingMode(null);
-        var addShape = e.overlay;
-        addShape.type = e.type;
-        google.maps.event.addListener(addShape, 'click', function() {
+
+      drawManager.setDrawingMode(null);
+      var addShape = e.overlay;
+      addShape.type = e.type;
+      google.maps.event.addListener(addShape, 'click', function() {
+        setSelection(addShape);
+      });
+
+      google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
+        google.maps.event.addListener(e.getPath(), 'set_at', function() {
           setSelection(addShape);
         });
-        setSelection(addShape);
-      }
+        // change between point of poligon
+        google.maps.event.addListener(e.getPath(), 'insert_at', function() {
+          setSelection(addShape);
+        });
+        google.maps.event.addListener(e.getPath(), 'remove_at', function() {
+          setSelection(addShape);
+        });
+      });
+
     });
 
     // geolocation center
@@ -175,10 +187,6 @@ jQuery(function($){
   // ajax save or change
   $('#save-button').click(function(){
     //todo validate form before submit
-    //load points data
-    if(currectShape){
-      var points = getCoord(currectShape);
-    }
     //ajax
     var data = $('#object_form').serialize();
     $.post(ajax_object.ajax_url, data, function(response) {
