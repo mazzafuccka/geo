@@ -137,6 +137,47 @@ jQuery(function($) {
     google.maps.event.addListener(map, 'click', clearSelection);
     // delete elements, clear map
     google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
+    //console.log(user_points);
+
+    /* Load poligons from user save data*/
+    var newPolys = [];
+    var polygons = [];
+    for (var inc = 0, ii = user_points.length; inc < ii; inc++) {
+      var newCoords = [];
+      var point = convertCoord(user_points[inc].points);
+      //console.log(user_points[inc].points);
+      //console.log(point);
+      var objects = point.split(',');
+      for (var i = 0; i < objects.length; i++) {
+        var coord = objects[i].split(' ');
+        console.log(coord);
+        newCoords.push(new google.maps.LatLng(coord[0], coord[1]));
+      }
+
+      newPolys[inc] = new google.maps.Polygon({
+        path: newCoords,
+        strokeWeight: 0,
+        fillColor: 'red',//todo
+        fillOpacity: 0.3
+      });
+
+      //todo load aditional info
+      newPolys[inc].setMap(map);
+      polygons.push(newPolys[inc]);
+      addNewPolys(newPolys[inc]);
+    }
+
+    function convertCoord(pointString) {
+      var point = pointString.match(/^POLYGON\(\((.*?)\)\)$/);
+      return point[1];
+    }
+
+    function addNewPolys(newPoly) {
+      google.maps.event.addListener(newPoly, 'click', function() {
+        setSelection(newPoly);
+      });
+    }
+
   }
 
   google.maps.event.addDomListener(window, 'load', initialize);
@@ -200,8 +241,23 @@ jQuery(function($) {
       alert('Error save data on server/ try again leter/');
     });
   });
-  // ajax remove
 
+  // ajax remove
+  $('#delete-button').click(function() {
+    //ajax
+    var data = $('#object_form').serialize();
+    $.post(ajax_object.ajax_url, data, function(response) {
+      // todo check for errors
+      if (response.state == 'success' && !response.error.length > 0) {
+        hidePanel();
+        deleteSelectedShape();
+        // clear form data point
+        $('form').find('input[type="text"],textarea').val('');
+      }
+    }).error(function() {
+      alert('Error delete data on server/ try again leter/');
+    });
+  });
   // ajax get user object data if saved
 
 });

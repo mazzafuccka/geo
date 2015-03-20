@@ -138,9 +138,11 @@ abstract class DataBaseCustomData {
 	 *
 	 * @return array
 	 */
-	public function getByUserId( $user_id ) {
+	public function getByUserId( $user_id, $extired = false ) {
 		global $wpdb;
-
+		if($extired == true){
+			$addWhere = ' and (end_time > NOW() or end_time is NULL) and status = 1';
+		}
 		if ( ! empty( $user_id ) ) {
 			$sql = $wpdb->prepare( 'SELECT
 				id,
@@ -153,7 +155,7 @@ abstract class DataBaseCustomData {
 				description,
 				type,
 				status
- 			FROM ' . $this->tableName . ' WHERE user_id = %d', $user_id );
+ 			FROM ' . $this->tableName . ' WHERE user_id = %d '.$addWhere, $user_id );
 
 			return $wpdb->get_results( $sql, ARRAY_A );
 		}

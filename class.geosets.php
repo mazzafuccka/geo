@@ -167,6 +167,18 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
+	 * user points
+	 */
+	public static function get_user_data(){
+		global $current_user;
+		$db = new GeoSets();
+		// current user data points from DB
+		$data = $db->getByUserId( $current_user->ID, true);
+		$data = self::loadGeoJson($data);
+		echo '<script> var user_points ='.json_encode($data).'</script>';
+	}
+
+	/**
 	 * view for cabinet top level page
 	 */
 	public static function geo_toplevel_page() {
@@ -249,6 +261,7 @@ class GeoSets extends DataBaseCustomData {
         </div>
         ";
 
+		self::get_user_data();
 		echo $html;
 	}
 
@@ -409,5 +422,14 @@ class GeoSets extends DataBaseCustomData {
 			return '';
 		}
 
+	}
+
+	/**
+	 * set db data to loadGeoJson google format
+	 * @param $data
+	 */
+	public static function loadGeoJson($data){
+		//todo
+		return $data;
 	}
 }
