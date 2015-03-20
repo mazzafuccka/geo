@@ -332,7 +332,7 @@ class GeoSets extends DataBaseCustomData {
 							break;
 					}
 
-					wp_send_json($response);
+					wp_send_json( $response );
 				}
 			}
 
@@ -353,7 +353,7 @@ class GeoSets extends DataBaseCustomData {
 		$removeData = array( 'token', 'id', 'unlim', 'action', '_wp_http_referer', 'type_object' );
 		foreach ( $input as $name => $value ) {
 			if ( ! in_array( $name, $removeData ) ) {
-				if ( $name == 'start_time' || $name == 'end_time' && $input['unlim'] == '0' && ! empty( $value ) ) {
+				if ( ( $name == 'start_time' || $name == 'end_time' ) && (!isset($input['unlim']) || $input['unlim'] == '0') && ! empty( $value ) ) {
 					//todo date
 					$mysql_date_string = date_create( $value )->format( 'Y-m-d H:i:s' ); //mysql format
 					$result[ $name ]   = $mysql_date_string;

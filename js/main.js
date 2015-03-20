@@ -1,5 +1,5 @@
 /*global $,google */
-jQuery(function($){
+jQuery(function($) {
   var drawManager;
   var currectShape;
 
@@ -19,17 +19,17 @@ jQuery(function($){
     setPoints(currectShape);
   }
 
-  function setPoints(p){
+  function setPoints(p) {
     var points = getCoord(p);
     $('#object_form').find('input[name="points"]').val(points);
   }
 
-  function showPanel(){
+  function showPanel() {
     var panel = document.getElementById('panel');
     panel.style.visibility = 'visible';
   }
 
-  function hidePanel(){
+  function hidePanel() {
     var panel = document.getElementById('panel');
     panel.style.visibility = 'hidden';
   }
@@ -169,9 +169,9 @@ jQuery(function($){
   });
 
   // toogle unlim
-  $('input[name="unlim"]').change(function(){
+  $('input[name="unlim"]').change(function() {
     var block = $('.dateTimeWrapper-js');
-    if (!this.checked){
+    if (!this.checked) {
       block.fadeIn('fast');
       $(this).val('0');
     }
@@ -185,18 +185,18 @@ jQuery(function($){
   });
 
   // ajax save or change
-  $('#save-button').click(function(){
+  $('#save-button').click(function() {
     //todo validate form before submit
     //ajax
     var data = $('#object_form').serialize();
     $.post(ajax_object.ajax_url, data, function(response) {
       // todo check for errors
-      if(response.state=='success' && !response.error){
+      if (response.state == 'success' && !response.error.length > 0) {
         hidePanel();
         // clear form data point
         $('form').find('input[type="text"],textarea').val('');
       }
-    }).error(function(){
+    }).error(function() {
       alert('Error save data on server/ try again leter/');
     });
   });
