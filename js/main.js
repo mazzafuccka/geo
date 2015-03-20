@@ -221,18 +221,26 @@ jQuery(function($) {
     }
   });
 
+  /**
+   * success event function manipulation
+   * @param response
+   */
+  function responseData(response){
+    if (response.state == 'success' && !response.error.length > 0) {
+      hidePanel();
+      if(response.action == 'edit_action'){
+        deleteSelectedShape();
+      }
+      // clear form data point
+      $('form').find('input[type="text"],textarea').val('');
+    }
+  }
   // ajax save or change
   $('#save-button').click(function() {
-    //todo validate form before submit
     //ajax
     var data = $('#object_form').serialize();
-    $.post(ajax_object.ajax_url, data, function(response) {
-      // todo check for errors
-      if (response.state == 'success' && !response.error.length > 0) {
-        hidePanel();
-        // clear form data point
-        $('form').find('input[type="text"],textarea').val('');
-      }
+    $.post(ajax_object.ajax_url, data, function (response){
+      responseData(response);
     }).error(function() {
       alert('Error save data on server/ try again leter/');
     });
@@ -245,13 +253,7 @@ jQuery(function($) {
     // set form delete action
     form.find('input[name="action"]').val('delete_action');
     $.post(ajax_object.ajax_url, form.serialize(), function(response) {
-      // todo check for errors
-      if (response.state == 'success' && !response.error.length > 0) {
-        hidePanel();
-        deleteSelectedShape();
-        // clear form data point
-        $('form').find('input[type="text"],textarea').val('');
-      }
+      responseData(response);
     }).error(function() {
       alert('Error delete data on server/ try again leter/');
     });
