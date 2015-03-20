@@ -72,7 +72,8 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
 
 		//ajax wp_ajax_nopriv
-		add_action( 'wp_ajax_nopriv_point_edit', array( 'geoSets', 'geo_ajax_point_edit' ) );
+		add_action( 'wp_ajax_new_action', array( 'geoSets', 'new_action' ) );
+		add_action( 'wp_ajax_nopriv_new_action', array( 'geoSets', 'new_action' ) );
 	}
 
 	/**
@@ -235,7 +236,8 @@ class GeoSets extends DataBaseCustomData {
                 <textarea name='description'></textarea>
 
                 <input type='hidden' name='points' value=''/>
-                <input type='hidden' name='action' value='new'/>
+                <input type='hidden' name='type_object' value='polygon'/>
+                <input type='hidden' name='action' value='new_action'/>
                 <input type='hidden' name='user_id' value='" . $current_user->ID . "'/>
                 " . wp_nonce_field( 'token_action', 'token' ) . "
             </form>
@@ -286,9 +288,9 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
-	 * ajax action to points edit
+	 * action ajax add new geometry points
 	 */
-	function geo_ajax_point_edit() {
+	public static function new_action() {
 		// check for user login
 		if ( is_user_logged_in() ) {
 			// check for token
@@ -300,43 +302,37 @@ class GeoSets extends DataBaseCustomData {
 				if ( isset( $_POST['user_id'] ) && $current_user->ID === (int) $_POST['user_id'] ) {
 					// work code
 					$actionType = isset( $_POST['action'] ) ? trim( $_POST['action'] ) : null;
-
-					$data     = $this->_prepare_data( $_POST, $current_user );
-					$response = new WP_Ajax_Response;
+					$db         = new GeoSets();
+					$data       = $db->_prepare_data( $_POST, $current_user );
 					//todo add actions for delete und update user points
 					switch ( $actionType ) {
-						case 'new':
+						case 'new_action':
 							if ( ! empty( $data ) && is_array( $data ) ) {
-								$res = $this->insert( $data );
+								$res = $db->insert( $data );
 								if ( $res ) {
-									$response->add(
-										array(
-											'error'  => array(),
-											'action' => 'new',
-											'state'  => 'success',
-											'data'   => $res
-										)
+									$response = array(
+										'error'  => array(),
+										'action' => 'new',
+										'state'  => 'success',
+										'data'   => $res
 									);
 								} else {
-									$response->add(
-										array(
-											'error'  => array( 'Point not create' ),
-											'action' => 'new',
-											'state'  => 'error',
-											'data'   => $res
-										)
+									$response = array(
+										'error'  => array( 'Point not create' ),
+										'action' => 'new',
+										'state'  => 'error',
+										'data'   => $res
 									);
 								}
 							}
 							break;
-						case 'edit':
+						case 'edit_action':
 							break;
-						case 'delete':
+						case 'delete_action':
 							break;
 					}
 
-					$response->send();
-					wp_die();
+					wp_send_json($response);
 				}
 			}
 
@@ -354,13 +350,17 @@ class GeoSets extends DataBaseCustomData {
 	private function _prepare_data( $input, $user = null ) {
 
 		$result     = array();
-		$removeData = array( 'token', 'id', 'unlim', 'action' );
+		$removeData = array( 'token', 'id', 'unlim', 'action', '_wp_http_referer', 'type_object' );
 		foreach ( $input as $name => $value ) {
-			if ( ! in_array( $value, $removeData ) ) {
-				if ( $name == 'start_time' || $name == 'end_time' && $input['unlim'] == '0' ) {
-					$date              = DateTime::createFromFormat( 'm/d/Y H:i:s', $value . ':00' );
-					$mysql_date_string = $date->format( 'Y-m-d H:i:s' );
+			if ( ! in_array( $name, $removeData ) ) {
+				if ( $name == 'start_time' || $name == 'end_time' && $input['unlim'] == '0' && ! empty( $value ) ) {
+					//todo date
+					$mysql_date_string = date_create( $value )->format( 'Y-m-d H:i:s' ); //mysql format
 					$result[ $name ]   = $mysql_date_string;
+				} elseif ( $input['type_object'] == 'polygon' && $name == 'points' ) {
+					//poligon convert data
+					$result[ $name ] = self::convertPointsTo( $value, $input['type_object'] );
+
 				} else {
 					$result[ $name ] = $value;
 				}
@@ -374,5 +374,40 @@ class GeoSets extends DataBaseCustomData {
 		$result['user_id'] = isset( $result['user_id'] ) && $user->ID == (int) $result['user_id'] ? (int) $result['user_id'] : $user->ID;
 
 		return $result;
+	}
+
+	/**
+	 * Convert type object to mysql string format data geometry objects
+	 *
+	 * @param $string
+	 * @param $type
+	 *
+	 * @return string
+	 */
+	public static function convertPointsTo( $string, $type ) {
+		if ( ! empty( $string ) && ! empty( $type ) ) {
+			// add end point if poligon
+			$data = explode( ',', $string );
+			if ( $type == 'polygon' ) {
+				//add first point
+				array_push( $data, $data[0] );
+				array_push( $data, $data[1] );
+			}
+			$points       = array_chunk( $data, 2 );
+			$points_s     = array_map( function ( $el ) {
+				return $el[0] . ' ' . $el[1];
+			}, $points );
+			$pointsString = implode( ',', $points_s );
+
+			//POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
+			//LINESTRING (30 10, 10 30, 40 40)
+			//POINT (30 10)
+			$resultString = mb_strtoupper( $type ) . ' ((' . $pointsString . '))';
+
+			return $resultString;
+		} else {
+			return '';
+		}
+
 	}
 }

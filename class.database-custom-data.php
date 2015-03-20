@@ -15,6 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
 /**
  * Abstract class which has helper functions to get data from the database CRUD
  */
@@ -49,7 +50,31 @@ abstract class DataBaseCustomData {
 			return false;
 		}
 
-		$wpdb->insert( $this->tableName, $data );
+		// columns
+		$columns = $valuesType = $values = array();
+		foreach ( $data as $key => $row ) {
+			if ( $key === 'points' ) {
+				$columns[] = $key;
+				$valuesType[]  = "GeomFromText('" . $row . "')";
+			} else {
+				$columns[]    = $key;
+				$values[]     = $row;
+				$valuesType[] = self::typeValue( $row );
+			}
+		}
+		$columns_string = implode( ',', $columns );
+		$columns_string = '(' . $columns_string . ')';
+
+		$typeValue_string = implode( ',', $valuesType );
+		$typeValue_string = '(' . $typeValue_string . ')';
+
+		$sql = $wpdb->prepare(
+			"INSERT INTO $this->tableName $columns_string VALUES $typeValue_string",
+			$values
+		);
+		$wpdb->query( $sql );
+
+//		$wpdb->insert( $this->tableName, $data );
 
 		return $wpdb->insert_id;
 	}
@@ -91,17 +116,18 @@ abstract class DataBaseCustomData {
 
 	/**
 	 * Get by id
+	 *
 	 * @param $id
 	 *
 	 * @return array
 	 */
-	public function getById ($id){
+	public function getById( $id ) {
 		global $wpdb;
 
-		if(!empty($id))
-		{
-			$sql = $wpdb->prepare('SELECT * FROM '.$this->tableName.' WHERE id = %d', $id);
-			return $wpdb->get_results($sql, ARRAY_A);
+		if ( ! empty( $id ) ) {
+			$sql = $wpdb->prepare( 'SELECT * FROM ' . $this->tableName . ' WHERE id = %d', $id );
+
+			return $wpdb->get_results( $sql, ARRAY_A );
 		}
 
 		return array();
@@ -109,19 +135,36 @@ abstract class DataBaseCustomData {
 
 	/**
 	 * Search rows by user
+	 *
 	 * @param $user_id
 	 *
 	 * @return array
 	 */
-	public function getByUserId ($user_id){
+	public function getByUserId( $user_id ) {
 		global $wpdb;
 
-		if(!empty($user_id))
-		{
-			$sql = $wpdb->prepare('SELECT * FROM '.$this->tableName.' WHERE user_id = %d', $user_id);
-			return $wpdb->get_results($sql, ARRAY_A);
+		if ( ! empty( $user_id ) ) {
+			$sql = $wpdb->prepare( 'SELECT * FROM ' . $this->tableName . ' WHERE user_id = %d', $user_id );
+
+			return $wpdb->get_results( $sql, ARRAY_A );
 		}
 
 		return array();
+	}
+
+	/**
+	 *
+	 * @param $value
+	 *
+	 * @return string
+	 */
+	public static function typeValue( $value ) {
+		if ( is_int( $value ) ) {
+			return '%d';
+		} else if ( is_float( $value ) ) {
+			return '%f';
+		} else {
+			return '%s';
+		}
 	}
 }

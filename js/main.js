@@ -190,9 +190,18 @@ jQuery(function($){
     //ajax
     var data = $('#object_form').serialize();
     $.post(ajax_object.ajax_url, data, function(response) {
-      alert('Got this from the server: ' + response);
+      // todo check for errors
+      if(response.state=='success' && !response.error){
+        hidePanel();
+        // clear form data point
+        $('form').find('input[type="text"],textarea').val('');
+      }
+    }).error(function(){
+      alert('Error save data on server/ try again leter/');
     });
   });
   // ajax remove
+
+  // ajax get user object data if saved
 
 });
