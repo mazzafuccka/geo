@@ -249,6 +249,7 @@ class GeoSets extends DataBaseCustomData {
                 <textarea name='description'></textarea>
 
                 <input type='hidden' name='points' value=''/>
+                <input type='hidden' name='id' value=''/>
                 <input type='hidden' name='type_object' value='polygon'/>
                 <input type='hidden' name='action' value='new_action'/>
                 <input type='hidden' name='user_id' value='" . $current_user->ID . "'/>
@@ -362,7 +363,11 @@ class GeoSets extends DataBaseCustomData {
 							break;
 						case 'delete_action':
 							if ( ! empty( $data ) && is_array( $data ) ) {
-								$res = $db->delete( $data );
+								$row_id = $data['id'];
+								if ( $row_id ) {
+									$res = $db->delete( $row_id );
+								}
+
 								if ( $res ) {
 									$response = array(
 										'error'  => array(),
