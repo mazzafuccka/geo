@@ -312,7 +312,6 @@ jQuery(function($) {
       google.maps.event.addListener(newPoly, 'click', function() {
         google.maps.event.addListener(newPoly.getPath(), 'set_at', function() {
           setSelection(newPoly);
-          console.log('set');
         });
         // change between point of poligon
         google.maps.event.addListener(newPoly.getPath(), 'insert_at', function() {
