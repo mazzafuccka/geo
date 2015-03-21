@@ -7,7 +7,8 @@ jQuery(function($) {
     if (currectShape) {
       currectShape.setEditable(false);
       currectShape = null;
-      hidePanel();
+      clearPointData();
+      //hidePanel();
     }
   }
 
@@ -16,12 +17,60 @@ jQuery(function($) {
     currectShape = shape;
     shape.setEditable(true);
     showPanel();
-    setPoints(currectShape);
+    setPointData(currectShape);
+    console.log(currectShape.get('info'));
   }
 
-  function setPoints(p) {
+  function clearPointData() {
+    var obj = $('#object_form');
+    obj.find('input[type="text"],textarea').each(function() {
+      $(this).val('');
+    });
+  }
+
+  function setPointData(p) {
     var points = getCoord(p);
-    $('#object_form').find('input[name="points"]').val(points);
+    var info = p.get('info');
+    var obj = $('#object_form');
+    obj.find('input[name="points"]').val(points);
+    obj.find('input').each(function() {
+      var name = $(this).attr('name');
+      for (var t in info) {
+        if (t == name) {
+          if (name == 'start_time' || name == 'end_time') {
+            if (info[name] === '0000-00-00 00:00:00') {
+              $(this).val('');
+            } else {
+              $(this).val(convertDate(info[name]));
+            }
+          } else {
+            $(this).val(info[name]);
+          }
+        }
+      }
+    });
+
+    // set ulim checkbox state
+    var start_time = obj.find('input[name="start_time"]');
+    var end_time = obj.find('input[name="end_time"]');
+    if (start_time !== '' || start_time !== '') {
+      // set unchecked and val = 0
+      obj.find('input[name="unlim"]').val('0');
+    }
+  }
+
+  function convertDate(date) {
+    if (typeof date === 'string') {
+      // Convert 'yyyy-mm-dd hh:mm:ss' to 'dd.mm.yyyy hh:mm:ss'
+      return date.replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3.$2.$1');
+    }
+  }
+
+  function convertDateMysqlFormat(date) {
+    if (typeof date === 'string') {
+      // Convert 'dd.mm.yyyy hh:mm:ss' to 'yyyy-mm-dd hh:mm:ss'
+      return date.replace(/^(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1') + ':00';
+    }
   }
 
   function showPanel() {
@@ -135,22 +184,25 @@ jQuery(function($) {
     google.maps.event.addListener(drawManager, 'drawingmode_changed', clearSelection);
     // click on map
     google.maps.event.addListener(map, 'click', clearSelection);
-    // delete elements, clear map
-    google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
 
     /* Load poligons from user save data*/
-    var newPolys = [];
+    var newPolygons = [];
     var polygons = [];
+    var infoData = [];
     for (var inc = 0, ii = user_points.length; inc < ii; inc++) {
       var newCoords = [];
       var point = convertCoord(user_points[inc].points);
+
+      infoData[inc] = user_points[inc];
+      delete user_points[inc].points;
+
       var objects = point.split(',');
       for (var i = 0; i < objects.length; i++) {
         var coord = objects[i].split(' ');
         newCoords.push(new google.maps.LatLng(coord[0], coord[1]));
       }
 
-      newPolys[inc] = new google.maps.Polygon({
+      newPolygons[inc] = new google.maps.Polygon({
         path: newCoords,
         strokeWeight: 0,
         fillColor: 'red',//todo
@@ -158,10 +210,12 @@ jQuery(function($) {
       });
 
       //todo load aditional info
-      newPolys[inc].setMap(map);
-      polygons.push(newPolys[inc]);
-      addNewPolys(newPolys[inc]);
+      newPolygons[inc].set('info', infoData[inc]);
+      newPolygons[inc].setMap(map);
+      polygons.push(newPolygons[inc]);
+      addNewPolys(newPolygons[inc]);
     }
+
 
     function convertCoord(pointString) {
       var point = pointString.match(/^POLYGON\(\((.*?)\)\)$/);
@@ -224,23 +278,43 @@ jQuery(function($) {
   /**
    * success event function manipulation
    * @param response
+   * @param data URI string data send form
    */
-  function responseData(response){
+  function responseData(response, data) {
     if (response.state == 'success' && !response.error.length > 0) {
       hidePanel();
-      if(response.action == 'edit_action'){
+      if (response.action == 'delete_action') {
         deleteSelectedShape();
+      }
+      if (response.action == 'new_action') {
+        var infoData = deserialize(data);
+        infoData.start_time = convertDateMysqlFormat(infoData.start_time);
+        infoData.end_time = convertDateMysqlFormat(infoData.end_time);
+        currectShape.set('info', infoData);
+        console.log(infoData);
       }
       // clear form data point
       $('form').find('input[type="text"],textarea').val('');
     }
   }
+
+  function deserialize(queryString) {
+    var obj = {};
+    var pairs = queryString.split('&');
+    for (var i in pairs) {
+      var split = pairs[i].split('=');
+      var value = decodeURIComponent(split[1]);
+      obj[decodeURIComponent(split[0])] = value.replace('+', ' ');
+    }
+    return obj;
+  }
+
   // ajax save or change
   $('#save-button').click(function() {
     //ajax
     var data = $('#object_form').serialize();
-    $.post(ajax_object.ajax_url, data, function (response){
-      responseData(response);
+    $.post(ajax_object.ajax_url, data, function(response) {
+      responseData(response, data);
     }).error(function() {
       alert('Error save data on server/ try again leter/');
     });

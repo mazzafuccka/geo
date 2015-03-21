@@ -319,7 +319,6 @@ class GeoSets extends DataBaseCustomData {
 					$actionType = isset( $_POST['action'] ) ? trim( $_POST['action'] ) : null;
 					$db         = new GeoSets();
 					$data       = $db->_prepare_data( $_POST, $current_user );
-					//todo add actions for delete und update user points
 					switch ( $actionType ) {
 						case 'new_action':
 							if ( ! empty( $data ) && is_array( $data ) ) {
@@ -365,7 +364,7 @@ class GeoSets extends DataBaseCustomData {
 							if ( ! empty( $data ) && is_array( $data ) ) {
 								$row_id = $data['id'];
 								if ( $row_id ) {
-									$res = $db->delete( $row_id );
+									$res = $db->delete( array( 'id' => $row_id ) );
 								}
 
 								if ( $res ) {
@@ -405,7 +404,7 @@ class GeoSets extends DataBaseCustomData {
 	private function _prepare_data( $input, $user = null ) {
 
 		$result     = array();
-		$removeData = array( 'token', 'id', 'unlim', 'action', '_wp_http_referer', 'type_object' );
+		$removeData = array( 'token', 'unlim', 'action', '_wp_http_referer', 'type_object' );
 		foreach ( $input as $name => $value ) {
 			if ( ! in_array( $name, $removeData ) ) {
 				if ( ( $name == 'start_time' || $name == 'end_time' ) && ( ! isset( $input['unlim'] ) || $input['unlim'] == '0' ) && ! empty( $value ) ) {
