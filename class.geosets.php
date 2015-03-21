@@ -67,6 +67,8 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
 		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
+		//call register settings function
+		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings') );
 
 		//js css
 		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
@@ -161,10 +163,28 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_add_cabinet_pages() {
 		$content = self::CONTENT;
-		add_menu_page( __( 'List Points', $content ), __( 'List Points', $content ), 'read', __FILE__, array(
-			'GeoSets',
-			'geo_toplevel_page'
-		), 'dashicons-location' );
+		add_menu_page(
+			__( 'List Points', $content ),
+			__( 'List Points', $content ),
+			'read',
+			__FILE__,
+			array(
+				'GeoSets',
+				'geo_toplevel_page'
+			),
+			'dashicons-location');
+		add_submenu_page(
+			__FILE__,
+			__( 'Settings', $content ),
+			__( 'Settings', $content ),
+			'administrator',
+			'geo_settings_page',
+			array(
+				'GeoSets',
+				'geo_settings_page'
+			),
+			'dashicons-admin-settings'
+		);
 	}
 
 	/**
@@ -487,5 +507,41 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function edit_action() {
 		self::new_action();
+	}
+
+	/**
+	 *  register settings page
+	 */
+	public static function register_mysettings() {
+		//register our settings
+		register_setting( 'geo-settings-group', 'limit' );
+	}
+
+	/**
+	 *
+	 */
+	public static function geo_settings_page() {
+		?>
+		<div class="wrap">
+			<h2><?php _e( 'Geo settings', self::CONTENT ) ?></h2>
+
+			<form method="post" action="options.php">
+				<?php settings_fields( 'geo-settings-group' ); ?>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Geo object limit', self::CONTENT ) ?></th>
+						<td><input type="text" name="limit" value="<?php echo get_option( 'limit' ); ?>"/></td>
+					</tr>
+					<!--				todo edit list menu types-->
+
+				</table>
+
+				<p class="submit">
+					<input type="submit" class="button-primary" value="<?php _e( 'Save Changes' ) ?>"/>
+				</p>
+
+			</form>
+		</div>
+	<?php
 	}
 }
