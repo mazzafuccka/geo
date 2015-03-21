@@ -341,8 +341,8 @@ class GeoSets extends DataBaseCustomData {
 							}
 							break;
 						case 'edit_action':
-							if ( ! empty( $data ) && is_array( $data ) ) {
-								$res = $db->update( $data );
+							if ( ! empty( $data ) && is_array( $data ) && isset($data['id'])) {
+								$res = $db->update( $data , array('id' => $data['id']));
 								if ( $res ) {
 									$response = array(
 										'error'  => array(),

@@ -1,26 +1,45 @@
 /*global $,google */
 jQuery(function($) {
+
+  /**
+   * {} draw map global object
+   */
   var drawManager;
+  /**
+   * {} Currect shape object
+   */
   var currectShape;
 
+
+  /**
+   * Clear selection, Clear point data
+   */
   function clearSelection() {
     if (currectShape) {
       currectShape.setEditable(false);
       currectShape = null;
       clearPointData();
-      //hidePanel();
+      hidePanel();
     }
   }
 
+
+  /**
+   * Set Current shape object show panel, write point data
+   * @param shape
+   */
   function setSelection(shape) {
     clearSelection(shape);
     currectShape = shape;
     shape.setEditable(true);
     showPanel();
     setPointData(currectShape);
-    console.log(currectShape.get('info'));
   }
 
+
+  /**
+   * Clear shape date from panel form
+   */
   function clearPointData() {
     var obj = $('#object_form');
     obj.find('input[type="text"],textarea').each(function() {
@@ -28,12 +47,18 @@ jQuery(function($) {
     });
   }
 
+  /**
+   * Set point Date information to form panel date
+   * @param {} p object google shape
+   */
   function setPointData(p) {
     var points = getCoord(p);
     var info = p.get('info');
     var obj = $('#object_form');
+    var action = obj.find('input[name="action"]');
     obj.find('input[name="points"]').val(points);
-    obj.find('input').each(function() {
+    obj.find('input[name="id"]').val('');
+    obj.find('input,textarea').each(function() {
       var name = $(this).attr('name');
       for (var t in info) {
         if (t == name) {
@@ -48,6 +73,14 @@ jQuery(function($) {
           }
         }
       }
+
+      //change action
+      if (typeof info === 'undefined') {
+        action.val('new_action');
+      } else {
+        action.val('edit_action');
+      }
+
     });
 
     // set ulim checkbox state
@@ -59,30 +92,54 @@ jQuery(function($) {
     }
   }
 
+
+  /**
+   * Convert mysql formate date to local format
+   * 'yyyy-mm-dd hh:mm:ss' to 'dd.mm.yyyy hh:mm:ss'
+   * @param date
+   * @returns {string}
+   */
   function convertDate(date) {
     if (typeof date === 'string') {
-      // Convert 'yyyy-mm-dd hh:mm:ss' to 'dd.mm.yyyy hh:mm:ss'
       return date.replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3.$2.$1');
     }
   }
 
+
+  /**
+   * Convert local format to mysql datetime format
+   * 'dd.mm.yyyy hh:mm:ss' to 'yyyy-mm-dd hh:mm:ss'
+   * @param date
+   * @returns {string}
+   */
   function convertDateMysqlFormat(date) {
     if (typeof date === 'string') {
-      // Convert 'dd.mm.yyyy hh:mm:ss' to 'yyyy-mm-dd hh:mm:ss'
       return date.replace(/^(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1') + ':00';
     }
   }
 
+
+  /**
+   * show panel information
+   */
   function showPanel() {
     var panel = document.getElementById('panel');
     panel.style.visibility = 'visible';
   }
 
+
+  /**
+   * hidden panel information
+   */
   function hidePanel() {
     var panel = document.getElementById('panel');
     panel.style.visibility = 'hidden';
   }
 
+
+  /**
+   * delete Selected Shape on active map
+   */
   function deleteSelectedShape() {
     if (currectShape) {
       currectShape.setMap(null);
@@ -92,6 +149,12 @@ jQuery(function($) {
     }
   }
 
+
+  /**
+   *
+   * @param currectShape
+   * @returns {Array}
+   */
   function getCoord(currectShape) {
     var vertices = currectShape.getPath();
     var result = [];
@@ -104,6 +167,10 @@ jQuery(function($) {
     return result;
   }
 
+
+  /**
+   * init map
+   */
   function initialize() {
     var map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
@@ -202,26 +269,44 @@ jQuery(function($) {
         newCoords.push(new google.maps.LatLng(coord[0], coord[1]));
       }
 
+      /**
+       * Random color
+       * @returns {string}
+       */
+      function getRandomColor() {
+        function c() {
+          return Math.floor(Math.random()*256).toString(16)
+        }
+        return "#"+c()+c()+c();
+      }
+
       newPolygons[inc] = new google.maps.Polygon({
         path: newCoords,
         strokeWeight: 0,
-        fillColor: 'red',//todo
-        fillOpacity: 0.3
+        fillColor: getRandomColor(),
+        fillOpacity: 0.7
       });
 
-      //todo load aditional info
       newPolygons[inc].set('info', infoData[inc]);
       newPolygons[inc].setMap(map);
       polygons.push(newPolygons[inc]);
       addNewPolys(newPolygons[inc]);
     }
 
-
+    /**
+     * convert coordinates WKT to pair lat, lon
+     * @param pointString
+     * @returns {*}
+     */
     function convertCoord(pointString) {
       var point = pointString.match(/^POLYGON\(\((.*?)\)\)$/);
       return point[1];
     }
 
+    /**
+     * add new polygo on map event on click
+     * @param newPoly
+     */
     function addNewPolys(newPoly) {
       google.maps.event.addListener(newPoly, 'click', function() {
         setSelection(newPoly);
@@ -259,6 +344,84 @@ jQuery(function($) {
     });
   });
 
+
+  /**
+   * success event function manipulation
+   * @param response
+   * @param data URI string data send form
+   */
+  function responseData(response, data) {
+    if (response.state == 'success' && !response.error.length > 0) {
+
+      hidePanel();
+      switch(response.action){
+        case 'delete_action' :
+          deleteSelectedShape();
+          break;
+        case 'edit_action' :
+        case 'new_action' :
+          var infoData = deserialize(data);
+          infoData.start_time = convertDateMysqlFormat(infoData.start_time);
+          infoData.end_time = convertDateMysqlFormat(infoData.end_time);
+          if(infoData.action == 'new_action'){
+            infoData.id = response.data;
+          }
+          currectShape.set('info', infoData);
+          break;
+      }
+
+      // clear form data point
+      $('form').find('input[type="text"],textarea').val('');
+    }
+  }
+
+
+  /**
+   * URI to js object
+   * @param queryString
+   * @returns {{}}
+   */
+  function deserialize(queryString) {
+    var obj = {};
+    var pairs = queryString.split('&');
+    for (var i in pairs) {
+      var split = pairs[i].split('=');
+      var value = decodeURIComponent(split[1]);
+      obj[decodeURIComponent(split[0])] = value.replace('+', ' ');
+    }
+    return obj;
+  }
+
+  // ajax save or change
+  $('#save-button').click(function() {
+    var form = $('#object_form');
+    var data = form.serialize();
+    $.post(ajax_object.ajax_url, data, function(response) {
+      responseData(response, data);
+    }).error(function() {
+      alert('Error save data on server/ try again leter/');
+    });
+  });
+
+
+  // ajax remove
+  $('#delete-button').click(function() {
+    var form = $('#object_form');
+    // check if element can id
+    if(!form.find('input[name="id"]').val()){
+      deleteSelectedShape();
+      return;
+    }
+    // set form delete action
+    form.find('input[name="action"]').val('delete_action');
+    $.post(ajax_object.ajax_url, form.serialize(), function(response) {
+      responseData(response);
+    }).error(function() {
+      alert('Error delete data on server/ try again leter/');
+    });
+  });
+
+
   // toogle unlim
   $('input[name="unlim"]').change(function() {
     var block = $('.dateTimeWrapper-js');
@@ -274,64 +437,4 @@ jQuery(function($) {
       $('#date_timepicker_start').val('');
     }
   });
-
-  /**
-   * success event function manipulation
-   * @param response
-   * @param data URI string data send form
-   */
-  function responseData(response, data) {
-    if (response.state == 'success' && !response.error.length > 0) {
-      hidePanel();
-      if (response.action == 'delete_action') {
-        deleteSelectedShape();
-      }
-      if (response.action == 'new_action') {
-        var infoData = deserialize(data);
-        infoData.start_time = convertDateMysqlFormat(infoData.start_time);
-        infoData.end_time = convertDateMysqlFormat(infoData.end_time);
-        currectShape.set('info', infoData);
-        console.log(infoData);
-      }
-      // clear form data point
-      $('form').find('input[type="text"],textarea').val('');
-    }
-  }
-
-  function deserialize(queryString) {
-    var obj = {};
-    var pairs = queryString.split('&');
-    for (var i in pairs) {
-      var split = pairs[i].split('=');
-      var value = decodeURIComponent(split[1]);
-      obj[decodeURIComponent(split[0])] = value.replace('+', ' ');
-    }
-    return obj;
-  }
-
-  // ajax save or change
-  $('#save-button').click(function() {
-    //ajax
-    var data = $('#object_form').serialize();
-    $.post(ajax_object.ajax_url, data, function(response) {
-      responseData(response, data);
-    }).error(function() {
-      alert('Error save data on server/ try again leter/');
-    });
-  });
-
-  // ajax remove
-  $('#delete-button').click(function() {
-    //ajax
-    var form = $('#object_form');
-    // set form delete action
-    form.find('input[name="action"]').val('delete_action');
-    $.post(ajax_object.ajax_url, form.serialize(), function(response) {
-      responseData(response);
-    }).error(function() {
-      alert('Error delete data on server/ try again leter/');
-    });
-  });
-  // ajax get user object data if saved
-
 });

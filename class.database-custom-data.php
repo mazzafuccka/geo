@@ -92,7 +92,27 @@ abstract class DataBaseCustomData {
 			return false;
 		}
 
-		$updated = $wpdb->update( $this->tableName, $data, $conditionValue );
+		$string = array();
+		$id     = $conditionValue['id'];
+		// data update
+		foreach ( $data as $key => $row ) {
+			if ( $key === 'points' ) {
+				$string[] = $key . " = GeomFromText('" . $row . "')";
+			} else {
+				$values[] = $row;
+				$string[] = $key . ' = ' . self::typeValue( $row );
+			}
+		}
+
+		$columns_string = implode( ',', $string );
+		array_push( $values, $id );
+
+		$sql     = $wpdb->prepare(
+			"UPDATE $this->tableName SET $columns_string WHERE id = %d",
+			$values
+		);
+
+		$updated = $wpdb->query( $sql );
 
 		return $updated;
 	}
@@ -140,7 +160,10 @@ abstract class DataBaseCustomData {
 	 */
 	public function getByUserId( $user_id, $extired = false ) {
 		global $wpdb;
-		if($extired == true){
+
+		$addWhere = '';
+
+		if ( $extired == true ) {
 			$addWhere = ' and (end_time > NOW() or end_time is NULL) and status = 1';
 		}
 		if ( ! empty( $user_id ) ) {
@@ -155,7 +178,7 @@ abstract class DataBaseCustomData {
 				description,
 				type,
 				status
- 			FROM ' . $this->tableName . ' WHERE user_id = %d '.$addWhere, $user_id );
+ 			FROM ' . $this->tableName . ' WHERE user_id = %d ' . $addWhere, $user_id );
 
 			return $wpdb->get_results( $sql, ARRAY_A );
 		}
