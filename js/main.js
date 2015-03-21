@@ -308,7 +308,19 @@ jQuery(function($) {
      * @param newPoly
      */
     function addNewPolys(newPoly) {
+
       google.maps.event.addListener(newPoly, 'click', function() {
+        google.maps.event.addListener(newPoly.getPath(), 'set_at', function() {
+          setSelection(newPoly);
+          console.log('set');
+        });
+        // change between point of poligon
+        google.maps.event.addListener(newPoly.getPath(), 'insert_at', function() {
+          setSelection(newPoly);
+        });
+        google.maps.event.addListener(newPoly.getPath(), 'remove_at', function() {
+          setSelection(newPoly);
+        });
         setSelection(newPoly);
       });
     }
