@@ -68,7 +68,7 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
 		//call register settings function
-		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings') );
+		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings' ) );
 
 		//js css
 		add_action( 'wp_enqueue_scripts', array( 'GeoSets', 'load_scripts' ) );
@@ -172,7 +172,7 @@ class GeoSets extends DataBaseCustomData {
 				'GeoSets',
 				'geo_toplevel_page'
 			),
-			'dashicons-location');
+			'dashicons-location' );
 		add_submenu_page(
 			__FILE__,
 			__( 'Settings', $content ),
@@ -263,8 +263,7 @@ class GeoSets extends DataBaseCustomData {
 				</div>
 
                 <label for='type'>" . __( 'Type object', GeoSets::CONTENT ) . "</label>
-                <input type='text' value='' name='type' required/>
-
+                " . self::type_list_select() . "
 				<label for='description'>" . __( 'Description', GeoSets::CONTENT ) . "</label>
                 <textarea name='description'></textarea>
 
@@ -361,8 +360,8 @@ class GeoSets extends DataBaseCustomData {
 							}
 							break;
 						case 'edit_action':
-							if ( ! empty( $data ) && is_array( $data ) && isset($data['id'])) {
-								$res = $db->update( $data , array('id' => $data['id']));
+							if ( ! empty( $data ) && is_array( $data ) && isset( $data['id'] ) ) {
+								$res = $db->update( $data, array( 'id' => $data['id'] ) );
 								if ( $res ) {
 									$response = array(
 										'error'  => array(),
@@ -515,6 +514,7 @@ class GeoSets extends DataBaseCustomData {
 	public static function register_mysettings() {
 		//register our settings
 		register_setting( 'geo-settings-group', 'limit' );
+		register_setting( 'geo-settings-group', 'typeList' );
 	}
 
 	/**
@@ -530,10 +530,24 @@ class GeoSets extends DataBaseCustomData {
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row"><?php _e( 'Geo object limit', self::CONTENT ) ?></th>
-						<td><input type="text" name="limit" value="<?php echo get_option( 'limit' ); ?>"/></td>
+						<td>
+							<input type="text" name="limit" value="<?php echo get_option( 'limit' ); ?>"/>
+							<ul>
+								<li class="description"><?php _e( 'Limit user sets on one page on one object', self::CONTENT ) ?></li>
+							</ul>
+						</td>
 					</tr>
-					<!--				todo edit list menu types-->
 
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Options types', self::CONTENT ) ?></th>
+						<td>
+							<textarea cols="45" rows="10"
+							          name="typeList"><?php echo get_option( 'typeList' ); ?></textarea>
+							<ul>
+								<li class="description"><?php _e( 'Set options type for select dropdown, user "code value" [space] "description" on one row.<br/>View example:<br/> 15 Type1<br/> 20 Type2', self::CONTENT ) ?></li>
+							</ul>
+						</td>
+					</tr>
 				</table>
 
 				<p class="submit">
@@ -543,5 +557,25 @@ class GeoSets extends DataBaseCustomData {
 			</form>
 		</div>
 	<?php
+	}
+
+	/**
+	 * get html typeList options
+	 * @return string
+	 */
+	public static function type_list_select() {
+		$data        = get_option( 'typeList' );
+		$data_ar_row = explode( "\n", $data );
+		$selected    = '';
+		$html        = '';
+		$html .= '<select class="" name="type">';
+		foreach ( $data_ar_row as $row ) {
+			$row_ar = explode( ' ', $row );
+			$html .= '<option ' . $selected . ' value="' . trim($row_ar[0]) . '">' . trim($row_ar[1]) . '</option>';
+		}
+		$html .= '';
+		$html .= '</select>';
+
+		return $html;
 	}
 }
