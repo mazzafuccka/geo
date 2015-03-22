@@ -33,7 +33,7 @@ jQuery(function($) {
    * @param shape
    */
   function setSelection(shape) {
-    clearSelection(shape);
+    //clearSelection(shape);
     currectShape = shape;
     shape.setEditable(true);
     showPanel();
@@ -252,7 +252,7 @@ jQuery(function($) {
       }
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
-        setSelection(addShape);
+        //setSelection(addShape); todo
         google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
         google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
