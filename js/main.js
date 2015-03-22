@@ -9,6 +9,10 @@ jQuery(function($) {
    * {} Currect shape object
    */
   var currectShape;
+  /**
+   * poligon on write
+   */
+  var poligon;
 
 
   /**
@@ -55,7 +59,9 @@ jQuery(function($) {
     var points = getCoord(p);
     var info = p.get('info');
     var obj = $('#object_form');
+    var emptyTime = '0000-00-00 00:00:00';
     var action = obj.find('input[name="action"]');
+    var unlim = obj.find('input[name="unlim"]');
     obj.find('input[name="points"]').val(points);
     obj.find('input[name="id"]').val('');
     obj.find('input,textarea').each(function() {
@@ -63,7 +69,7 @@ jQuery(function($) {
       for (var t in info) {
         if (t == name) {
           if (name == 'start_time' || name == 'end_time') {
-            if (info[name] === '0000-00-00 00:00:00') {
+            if (info[name] === emptyTime) {
               $(this).val('');
             } else {
               $(this).val(convertDate(info[name]));
@@ -73,7 +79,6 @@ jQuery(function($) {
           }
         }
       }
-
       //change action
       if (typeof info === 'undefined') {
         action.val('new_action');
@@ -83,13 +88,17 @@ jQuery(function($) {
 
     });
 
-    // set ulim checkbox state
-    var start_time = obj.find('input[name="start_time"]');
-    var end_time = obj.find('input[name="end_time"]');
-    if (start_time !== '' || start_time !== '') {
-      // set unchecked and val = 0
-      obj.find('input[name="unlim"]').val('0');
+    var block = $('.dateTimeWrapper-js');
+    if (info['start_time'] === emptyTime && info['end_time'] === emptyTime) {
+      unlim.val('1');
+      unlim.attr('checked', true);
+      block.hide();
+    } else {
+      unlim.val('0');
+      unlim.attr('checked', false);
+      block.show();
     }
+
   }
 
 
@@ -214,12 +223,12 @@ jQuery(function($) {
 
     // poligon draw complete
     google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
-
+      //showPanel();
       //check point limit
       var objLimit = e.overlay.getPath().getArray().length,
-        message='Limit point on shape! Use less then ' + ajax_object.limit;
+        message = 'Limit point on shape! Use less then ' + ajax_object.limit;
 
-      if(objLimit > +ajax_object.limit){
+      if (objLimit > +ajax_object.limit) {
         alert(message);
         currectShape = e.overlay;
         deleteSelectedShape();
@@ -232,11 +241,10 @@ jQuery(function($) {
         setSelection(addShape);
       });
 
-      function pointUpdate(index){
+      function pointUpdate(index) {
         var length = this.getArray().length;
-        if(length > +ajax_object.limit){
+        if (length > +ajax_object.limit) {
           alert(message);
-          currectShape = addShape;
           this.removeAt(index);
           return false;
         }
@@ -244,6 +252,7 @@ jQuery(function($) {
       }
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
+        setSelection(addShape);
         google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
         google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
@@ -251,10 +260,8 @@ jQuery(function($) {
           setSelection(addShape);
         });
       });
-
+      poligon = e.overlay;
     });
-
-
 
     // geolocation center
     if (navigator.geolocation) {
@@ -270,19 +277,18 @@ jQuery(function($) {
     google.maps.event.addListener(drawManager, 'drawingmode_changed', clearSelection);
     // click on map
     google.maps.event.addListener(map, 'click', clearSelection);
-    // contextmenu
-    google.maps.event.addListener(map, 'rightclick', function(e){
-      console.log(e);
-      console.log(this);
-      //this.setMap(null);
-      //drawManager.setDrawingMode(null).setMap(null);
-      //e.setMap(null);
+    // rightclick
+    google.maps.event.addListener(map, 'rightclick', function(e) {
+      poligon = e.overlay;
+      drawManager.setDrawingMode(null);
+      poligon.setMap(null);
     });
 
-    $(document).keyup(function(e) {
-      if (e.keyCode == 27) { // esc
-        //e.setMap(null);
+    google.maps.event.addDomListener(document, 'keyup', function(e) {
+      var code = (e.keyCode ? e.keyCode : e.which);
+      if (code === 27) {
         drawManager.setDrawingMode(null);
+        poligon.setMap(null);
       }
     });
 
@@ -309,9 +315,10 @@ jQuery(function($) {
        */
       function getRandomColor() {
         function c() {
-          return Math.floor(Math.random()*256).toString(16)
+          return Math.floor(Math.random() * 256).toString(16)
         }
-        return "#"+c()+c()+c();
+
+        return "#" + c() + c() + c();
       }
 
       newPolygons[inc] = new google.maps.Polygon({
@@ -346,11 +353,11 @@ jQuery(function($) {
       google.maps.event.addListener(newPoly, 'click', function() {
 
         var loadpointsLimit = newPoly.getPath().getArray().length,
-          message='Limit point on shape! Use less then ' + ajax_object.limit;
+          message = 'Limit point on shape! Use less then ' + ajax_object.limit;
 
-        function pointUpdate(index){
+        function pointUpdate(index) {
           var length = this.getArray().length;
-          if(loadpointsLimit < +ajax_object.limit && length > +ajax_object.limit){
+          if (loadpointsLimit < +ajax_object.limit && length > +ajax_object.limit) {
             alert(message);
             currectShape = addShape;
             this.removeAt(index);
@@ -410,7 +417,7 @@ jQuery(function($) {
     if (response.state == 'success' && !response.error.length > 0) {
 
       hidePanel();
-      switch(response.action){
+      switch (response.action) {
         case 'delete_action' :
           deleteSelectedShape();
           break;
@@ -418,9 +425,9 @@ jQuery(function($) {
         case 'new_action' :
           var infoData = deserialize(data);
           console.log(infoData);
-          if(infoData.start_time) infoData.start_time = convertDateMysqlFormat(infoData.start_time);
-          if(infoData.end_time) infoData.end_time = convertDateMysqlFormat(infoData.end_time);
-          if(infoData.action == 'new_action'){
+          if (infoData.start_time) infoData.start_time = convertDateMysqlFormat(infoData.start_time);
+          if (infoData.end_time) infoData.end_time = convertDateMysqlFormat(infoData.end_time);
+          if (infoData.action == 'new_action') {
             infoData.id = response.data;
           }
           currectShape.set('info', infoData);
@@ -444,7 +451,7 @@ jQuery(function($) {
     for (var i in pairs) {
       var split = pairs[i].split('=');
       var value = split[1];
-      obj[decodeURIComponent(split[0])] = decodeURIComponent(value.replace(/\+/g,  " "));
+      obj[decodeURIComponent(split[0])] = decodeURIComponent(value.replace(/\+/g, " "));
     }
     return obj;
   }
@@ -465,7 +472,7 @@ jQuery(function($) {
   $('#delete-button').click(function() {
     var form = $('#object_form');
     // check if element can id
-    if(!form.find('input[name="id"]').val()){
+    if (!form.find('input[name="id"]').val()) {
       deleteSelectedShape();
       return;
     }
