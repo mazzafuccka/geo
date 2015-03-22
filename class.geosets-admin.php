@@ -48,5 +48,25 @@ class GeoSetsAdmin {
 	 */
 	private static function init_hooks() {
 		self::$initiated = true;
+		self::load_scripts();
+	}
+
+	/**
+	 * method load require scripts
+	 */
+	public static function load_scripts() {
+		wp_enqueue_script(
+			'geo',
+			plugins_url( '/js/main-admin.js', __FILE__ ),
+			array( 'jquery' )
+		);
+		// add info
+		wp_localize_script( 'geo', 'ajax_object',
+			array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'token_action'),
+			'user_id' => get_current_user_id()
+			)
+		);
 	}
 }

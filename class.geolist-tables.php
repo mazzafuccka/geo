@@ -40,7 +40,8 @@ class GeoListTables extends WP_List_Table {
 			'type'        => __( 'Type', $content ),
 			'points'      => __( 'Coordinates', $content ),
 			'modify_time' => __( 'Edit time', $content ),
-			'status'      => __( 'Status', $content )
+			'status'      => __( 'Status', $content ),
+			'actions'      => __( 'Action', $content )
 		);
 
 		return $columns;
@@ -76,8 +77,11 @@ class GeoListTables extends WP_List_Table {
 			case 'points':
 			case 'modify_time':
 			case 'status':
+
 			default:
 				return $item[ $column_name ];
+			case 'actions':
+				return '<a class="remove" href="#" data-id ="'.$item['id'].'" >x</a>';
 		}
 	}
 

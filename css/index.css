@@ -1,7 +1,7 @@
 #map {
     padding: 0;
     margin: 0;
-    height: 500px;
+    height: 530px;
     width: 100%;
 }
 
@@ -11,7 +11,7 @@
     position: absolute;
     top: 1em;
     right: 0;
-    min-height: 520px;
+    min-height: 550px;
     background-color: white;
     width: 300px;
     visibility: hidden;
@@ -43,6 +43,13 @@
 #panel textarea{
     display: block;
     margin: 6px 0;
+}
+.cabinet{
+    position: absolute;
+    left: 80px;
+    top: 30px;
+    background-color: white;
+    padding: 5px 10px;
 }
 
 

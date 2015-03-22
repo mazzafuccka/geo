@@ -67,6 +67,7 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
 		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
+		add_action( 'geo_toplevel_page', array( 'GeoSets', 'geo_toplevel_page' ) );
 		//call register settings function
 		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings' ) );
 
@@ -77,6 +78,9 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'wp_ajax_new_action', array( 'geoSets', 'new_action' ) );
 		add_action( 'wp_ajax_delete_action', array( 'geoSets', 'delete_action' ) );
 		add_action( 'wp_ajax_edit_action', array( 'geoSets', 'edit_action' ) );
+
+		//cabinet page template
+		add_filter( 'page_template', array( 'geoSets', 'geo_cabinet_page_template' ) );
 	}
 
 	/**
@@ -195,7 +199,6 @@ class GeoSets extends DataBaseCustomData {
 		$db = new GeoSets();
 		// current user data points from DB
 		$data = $db->getByUserId( $current_user->ID, true );
-		$data = self::loadGeoJson( $data );
 		echo '<script> var user_points =' . json_encode( $data ) . '</script>';
 	}
 
@@ -243,6 +246,7 @@ class GeoSets extends DataBaseCustomData {
 		$html = "
 		<!--content-->
         <div id='map'></div>
+        <div class='cabinet'><a href='/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a></div>
         <div id='panel'>
             <div class='info'>
             <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>
@@ -485,16 +489,6 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
-	 * set db data to loadGeoJson google format
-	 *
-	 * @param $data
-	 */
-	public static function loadGeoJson( $data ) {
-		//todo
-		return $data;
-	}
-
-	/**
 	 * delete action
 	 */
 	public static function delete_action() {
@@ -571,11 +565,24 @@ class GeoSets extends DataBaseCustomData {
 		$html .= '<select class="" name="type">';
 		foreach ( $data_ar_row as $row ) {
 			$row_ar = explode( ' ', $row );
-			$html .= '<option ' . $selected . ' value="' . trim($row_ar[0]) . '">' . trim($row_ar[1]) . '</option>';
+			$html .= '<option ' . $selected . ' value="' . trim( $row_ar[0] ) . '">' . trim( $row_ar[1] ) . '</option>';
 		}
 		$html .= '';
 		$html .= '</select>';
 
 		return $html;
+	}
+
+	/**
+	 * @param $page_template
+	 *
+	 * @return string
+	 */
+	public static function geo_cabinet_page_template( $page_template ) {
+		if ( is_page( 'cabinet' ) ) {
+			$page_template = dirname( __FILE__ ) . '/cabinet.php';
+		}
+
+		return $page_template;
 	}
 }
