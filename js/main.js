@@ -372,8 +372,9 @@ jQuery(function($) {
         case 'edit_action' :
         case 'new_action' :
           var infoData = deserialize(data);
-          infoData.start_time = convertDateMysqlFormat(infoData.start_time);
-          infoData.end_time = convertDateMysqlFormat(infoData.end_time);
+          console.log(infoData);
+          if(infoData.start_time) infoData.start_time = convertDateMysqlFormat(infoData.start_time);
+          if(infoData.end_time) infoData.end_time = convertDateMysqlFormat(infoData.end_time);
           if(infoData.action == 'new_action'){
             infoData.id = response.data;
           }
@@ -397,8 +398,8 @@ jQuery(function($) {
     var pairs = queryString.split('&');
     for (var i in pairs) {
       var split = pairs[i].split('=');
-      var value = decodeURIComponent(split[1]);
-      obj[decodeURIComponent(split[0])] = value.replace('+', ' ');
+      var value = split[1];
+      obj[decodeURIComponent(split[0])] = decodeURIComponent(value.replace(/\+/g,  " "));
     }
     return obj;
   }
