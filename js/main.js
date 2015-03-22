@@ -215,6 +215,16 @@ jQuery(function($) {
     // poligon draw complete
     google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
 
+      //check point limit
+      var objLimit = e.overlay.getPath().getArray().length,
+        message='Limit point on shape! Use less then ' + ajax_object.limit;
+
+      if(objLimit > +ajax_object.limit){
+        alert(message);
+        currectShape = e.overlay;
+        deleteSelectedShape();
+        return;
+      }
       drawManager.setDrawingMode(null);
       var addShape = e.overlay;
       addShape.type = e.type;
@@ -222,20 +232,29 @@ jQuery(function($) {
         setSelection(addShape);
       });
 
+      function pointUpdate(index){
+        var length = this.getArray().length;
+        if(length > +ajax_object.limit){
+          alert(message);
+          currectShape = addShape;
+          this.removeAt(index);
+          return false;
+        }
+        setSelection(addShape);
+      }
+
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
-        google.maps.event.addListener(e.getPath(), 'set_at', function() {
-          setSelection(addShape);
-        });
+        google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
-        google.maps.event.addListener(e.getPath(), 'insert_at', function() {
-          setSelection(addShape);
-        });
+        google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
         google.maps.event.addListener(e.getPath(), 'remove_at', function() {
           setSelection(addShape);
         });
       });
 
     });
+
+
 
     // geolocation center
     if (navigator.geolocation) {
@@ -251,6 +270,21 @@ jQuery(function($) {
     google.maps.event.addListener(drawManager, 'drawingmode_changed', clearSelection);
     // click on map
     google.maps.event.addListener(map, 'click', clearSelection);
+    // contextmenu
+    google.maps.event.addListener(map, 'rightclick', function(e){
+      console.log(e);
+      console.log(this);
+      //this.setMap(null);
+      //drawManager.setDrawingMode(null).setMap(null);
+      //e.setMap(null);
+    });
+
+    $(document).keyup(function(e) {
+      if (e.keyCode == 27) { // esc
+        //e.setMap(null);
+        drawManager.setDrawingMode(null);
+      }
+    });
 
     /* Load poligons from user save data*/
     var newPolygons = [];
@@ -310,13 +344,24 @@ jQuery(function($) {
     function addNewPolys(newPoly) {
 
       google.maps.event.addListener(newPoly, 'click', function() {
-        google.maps.event.addListener(newPoly.getPath(), 'set_at', function() {
+
+        var loadpointsLimit = newPoly.getPath().getArray().length,
+          message='Limit point on shape! Use less then ' + ajax_object.limit;
+
+        function pointUpdate(index){
+          var length = this.getArray().length;
+          if(loadpointsLimit < +ajax_object.limit && length > +ajax_object.limit){
+            alert(message);
+            currectShape = addShape;
+            this.removeAt(index);
+            return false;
+          }
           setSelection(newPoly);
-        });
+        }
+
+        google.maps.event.addListener(newPoly.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
-        google.maps.event.addListener(newPoly.getPath(), 'insert_at', function() {
-          setSelection(newPoly);
-        });
+        google.maps.event.addListener(newPoly.getPath(), 'insert_at', pointUpdate);
         google.maps.event.addListener(newPoly.getPath(), 'remove_at', function() {
           setSelection(newPoly);
         });

@@ -306,7 +306,8 @@ class GeoSets extends DataBaseCustomData {
 			array(
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'token_action' ),
-				'user_id'  => get_current_user_id()
+				'user_id'  => get_current_user_id(),
+				'limit'    => get_option( 'limit' )
 			)
 		);
 
