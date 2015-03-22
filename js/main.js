@@ -181,14 +181,26 @@ jQuery(function($) {
    * init map
    */
   function initialize() {
+
     var map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
-      // default city
-      center: new google.maps.LatLng(55.75222, 37.61556),
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: true,
       zoomControl: true
     });
+    var defaultGeo = new google.maps.LatLng(55.75222, 37.61556);
+    // geolocation center
+    if (navigator.geolocation) {
+      var showPosition = function(position) {
+        map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
+      };
+      navigator.geolocation.getCurrentPosition(showPosition, function(){
+        map.setCenter(defaultGeo);
+      });
+    } else {
+      // default city
+      map.setCenter(defaultGeo);
+    }
 
     var polyOptions = {
       strokeWeight: 0,
@@ -262,15 +274,6 @@ jQuery(function($) {
       });
       poligon = e.overlay;
     });
-
-    // geolocation center
-    if (navigator.geolocation) {
-      var showPosition = function(position) {
-        map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
-
-      };
-      navigator.geolocation.getCurrentPosition(showPosition);
-    }
 
     // Clear the current selection when the drawing mode is changed, or when the
     // map is clicked.
