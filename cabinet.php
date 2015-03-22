@@ -299,10 +299,10 @@ wp_enqueue_script('user-profile');
 
 		<input type="hidden" name="action" value="update" />
 		<input type="hidden" name="user_id" id="user_id" value="<?php echo esc_attr($user_id); ?>" />
-		<input type="submit" name="<? _e('Submit', GeoSets::CONTENT);?>"/>
+		<input type="submit" value="<?php _e('Submit', GeoSets::CONTENT);?>"/>
 
 	</form>
-<!--	--><?php //do_action('geo_toplevel_page');?>
+	<?php do_action('showTable');?>
 </main>
 
 <?php get_footer(); ?>

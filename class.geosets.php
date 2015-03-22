@@ -67,7 +67,7 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
 		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
-		add_action( 'geo_toplevel_page', array( 'GeoSets', 'geo_toplevel_page' ) );
+		add_action( 'showTable', array( 'GeoSets', 'showTable' ) );
 		//call register settings function
 		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings' ) );
 
@@ -302,7 +302,13 @@ class GeoSets extends DataBaseCustomData {
 			array( 'jquery', 'gmaps-draw', 'datetime' )
 		);
 		// add info
-		wp_localize_script( 'geo', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( 'geo', 'ajax_object',
+			array(
+				'ajax_url' => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( 'token_action' ),
+				'user_id'  => get_current_user_id()
+			)
+		);
 
 		//css
 		self::load_styles();
@@ -574,6 +580,29 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
+	 * get Type name
+	 * @param $id
+	 *
+	 * @return string
+	 */
+	public static function getTypeListName( $id ) {
+		$data        = get_option( 'typeList' );
+		$data_ar_row = explode( "\n", $data );
+		$name        = '';
+		foreach ( $data_ar_row as $row ) {
+			$row_ar = explode( ' ', $row );
+			if ( trim( $row_ar[0] ) === $id ) {
+				$name = $row_ar[1];
+			}
+		}
+		if ( ! empty( $name ) ) {
+			return $name;
+		} else {
+			return $id;
+		}
+	}
+
+	/**
 	 * @param $page_template
 	 *
 	 * @return string
@@ -584,5 +613,77 @@ class GeoSets extends DataBaseCustomData {
 		}
 
 		return $page_template;
+	}
+
+	/**
+	 * show table
+	 */
+	public static function showTable() {
+		global $current_user;
+		get_currentuserinfo();
+
+		$db = new GeoSets();
+		// current user data points from DB
+		$data    = $db->getByUserId( $current_user->ID );
+		$content = GeoSets::CONTENT;
+		$columns = array(
+			'id'          => __( '#', $content ),
+			'name'        => __( 'Name', $content ),
+			'description' => __( 'Description', $content ),
+			'start_time'  => __( 'Start time', $content ),
+			'end_time'    => __( 'End time', $content ),
+			'type'        => __( 'Type', $content ),
+			'points'      => __( 'Coordinates', $content ),
+			'modify_time' => __( 'Edit time', $content ),
+			'status'      => __( 'Status', $content ),
+			'actions'     => __( 'Action', $content )
+		);
+
+		function colHeadHtml( $columns ) {
+			//<th scope="col" id="id" class="manage-column column-id" >#</th>
+			$html = '<tr>';
+			foreach ( $columns as $key => $row ) {
+				$html .= '<th scope="col" id="' . $key . '" class="manage-column column-' . $key . '">' . $row . '</th>';
+			}
+			$html .= '</tr>';
+
+			return $html;
+		}
+
+		function bodyHtml( $columns, $data ) {
+			//<td class="id column-id">22</td>
+			$html = '<tr>';
+			foreach ( $columns as $key => $row ) {
+				$value = '';
+				foreach ( $data as $v ) {
+					if ( isset( $v[ $key ] ) ) {
+						$value = $v[ $key ];
+					}
+					if ( $key === 'actions' ) {
+						$value = '<a class="remove" href="#" data-id ="' . $v['id'] . '" >x</a>';
+					}
+					if ( $key === 'type' ) {
+						$value = GeoSets::getTypeListName($v[ $key ]);
+					}
+				}
+
+				$html .= '<td class="column-' . $key . '">' . $value . '</td>';
+			}
+			$html .= '</tr>';
+
+			return $html;
+		}
+
+		?>
+		<!-- Шаблон таблицы -->
+		<div class="wrapper">
+			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
+			<table class="wp-list-table fixed">
+				<thead><?php echo colHeadHtml( $columns ); ?></thead>
+				<tfoot><?php echo colHeadHtml( $columns ); ?></tfoot>
+				<tbody><?php echo bodyHtml( $columns, $data ); ?></tbody>
+			</table>
+		</div>
+	<?php
 	}
 }
