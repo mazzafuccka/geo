@@ -1,4 +1,4 @@
-/*global $,google */
+/*global $, google, ajax_object */
 jQuery(function($) {
 
   /**
@@ -53,7 +53,7 @@ jQuery(function($) {
 
   /**
    * Set point Date information to form panel date
-   * @param {} p object google shape
+   * @param {object} p object google shape
    */
   function setPointData(p) {
     var points = getCoord(p);
@@ -194,7 +194,7 @@ jQuery(function($) {
       var showPosition = function(position) {
         map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
       };
-      navigator.geolocation.getCurrentPosition(showPosition, function(){
+      navigator.geolocation.getCurrentPosition(showPosition, function() {
         map.setCenter(defaultGeo);
       });
     } else {
@@ -452,9 +452,11 @@ jQuery(function($) {
     var obj = {};
     var pairs = queryString.split('&');
     for (var i in pairs) {
-      var split = pairs[i].split('=');
-      var value = split[1];
-      obj[decodeURIComponent(split[0])] = decodeURIComponent(value.replace(/\+/g, " "));
+      if (pairs.hasOwnProperty(i)) {
+        var split = pairs[i].split('=');
+        var value = split[1];
+        obj[decodeURIComponent(split[0])] = decodeURIComponent(value.replace(/\+/g, " "));
+      }
     }
     return obj;
   }
