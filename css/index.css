@@ -9,12 +9,12 @@
     font-family: Arial, sans-serif;
     font-size: 13px;
     position: absolute;
-    top: 1em;
+    top: 0;
     right: 0;
-    min-height: 550px;
+    min-height: 520px;
     background-color: white;
     width: 300px;
-    visibility: hidden;
+    display: none;
 }
 
 #panel #delete-button {
@@ -29,6 +29,7 @@
 
 #panel .info {
     padding: 1.5em;
+    padding-bottom: 75px;
 }
 
 #panel label {
@@ -53,6 +54,39 @@
 }
 .wrapper table tr td {
     overflow: hidden;
+}
+
+
+.info-block{
+    position: absolute;
+    top:0;
+    right:0;
+    z-index: 10;
+}
+.info-block.error,
+.info-block.notice,
+.info-block.success {
+    background: #fff;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+    margin-left: 0;
+    padding: 12px;
+}
+
+div.error {
+    border-left: 4px solid #dd3d36;
+}
+
+div.notice {
+    border-left: 4px solid #c19005;
+}
+
+div.success {
+    border-left: 4px solid #175d02;
+}
+
+.wrapper{
+    padding: 2em;
 }
 
 

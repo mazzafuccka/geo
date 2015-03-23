@@ -33,7 +33,7 @@ jQuery(function($) {
    * @param shape
    */
   function setSelection(shape) {
-    //clearSelection(shape);
+    clearSelection(shape);
     currectShape = shape;
     shape.setEditable(true);
     showPanel();
@@ -133,7 +133,7 @@ jQuery(function($) {
    */
   function showPanel() {
     var panel = document.getElementById('panel');
-    panel.style.visibility = 'visible';
+    panel.style.display = 'block';
   }
 
 
@@ -142,7 +142,7 @@ jQuery(function($) {
    */
   function hidePanel() {
     var panel = document.getElementById('panel');
-    panel.style.visibility = 'hidden';
+    panel.style.display = 'none';
   }
 
 
@@ -264,13 +264,17 @@ jQuery(function($) {
       }
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
-        //setSelection(addShape); todo
+        poligon = e.overlay;
+        //showPanel();
+        //setSelection(addShape);
+        //showMessage({action: 'new_action', state: 'success'}, 'Click on the area to save it');
         google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
         google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
         google.maps.event.addListener(e.getPath(), 'remove_at', function() {
           setSelection(addShape);
         });
+        //setTimeout(function(){setSelection(addShape);},0);
       });
       poligon = e.overlay;
     });
@@ -285,6 +289,7 @@ jQuery(function($) {
       poligon = e.overlay;
       drawManager.setDrawingMode(null);
       poligon.setMap(null);
+      //deleteSelectedShape(currectShape);
     });
 
     google.maps.event.addDomListener(document, 'keyup', function(e) {
@@ -292,6 +297,7 @@ jQuery(function($) {
       if (code === 27) {
         drawManager.setDrawingMode(null);
         poligon.setMap(null);
+        //deleteSelectedShape(currectShape);
       }
     });
 
@@ -327,8 +333,8 @@ jQuery(function($) {
       newPolygons[inc] = new google.maps.Polygon({
         path: newCoords,
         strokeWeight: 0,
-        fillColor: getRandomColor(),
-        fillOpacity: 0.7
+        //fillColor: getRandomColor(),
+        fillOpacity: 0.45
       });
 
       newPolygons[inc].set('info', infoData[inc]);
@@ -417,15 +423,17 @@ jQuery(function($) {
    * @param data URI string data send form
    */
   function responseData(response, data) {
+    var message = '';
     if (response.state == 'success' && !response.error.length > 0) {
-
       hidePanel();
       switch (response.action) {
         case 'delete_action' :
+          message = 'Deleted.';
           deleteSelectedShape();
           break;
         case 'edit_action' :
         case 'new_action' :
+          message = 'Saved.';
           var infoData = deserialize(data);
           console.log(infoData);
           if (infoData.start_time) infoData.start_time = convertDateMysqlFormat(infoData.start_time);
@@ -439,9 +447,47 @@ jQuery(function($) {
 
       // clear form data point
       $('form').find('input[type="text"],textarea').val('');
+    } else if (response.state == 'error' && response.error.length > 0) {
+      showMessage(response, response.error[0]);
     }
+    showMessage(response, message);
   }
 
+  /**
+   * Show message handler
+   * @param response
+   * @param message
+   */
+  function showMessage(response, message) {
+    var infoBlock = $('.info-block');
+
+    setTimeout(function() {
+      infoBlock.css("visibility", "hidden");
+    }, 5000);
+
+    if (!response || response === '0') {
+      infoBlock.html('Server error.');
+      infoBlock.css("visibility", "visible");
+      if (!infoBlock.hasClass('error')) {
+        infoBlock.addClass('error').removeClass('success');
+      }
+      return;
+    }
+
+    if (response.state === 'error') {
+      infoBlock.html(response.error);
+      infoBlock.css("visibility", "visible");
+      if (!infoBlock.hasClass('error')) {
+        infoBlock.addClass('error').removeClass('success');
+      }
+    } else if (response.state === 'success') {
+      infoBlock.html(message);
+      infoBlock.css("visibility", "visible");
+      if (!infoBlock.hasClass('success')) {
+        infoBlock.addClass('success').removeClass('error');
+      }
+    }
+  }
 
   /**
    * URI to js object

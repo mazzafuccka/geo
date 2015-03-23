@@ -265,6 +265,9 @@ class GeoSets extends DataBaseCustomData {
         <a href='" . get_site_url() . "/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a> |
         <a href='" . wp_logout_url( home_url() ) . "' title='Logout'>Logout</a>
         </div>
+
+        <div class='info-block error' style='visibility:hidden;'></div>
+
         <div id='panel'>
             <div class='info'>
             <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>
@@ -710,7 +713,7 @@ class GeoSets extends DataBaseCustomData {
 		<!-- Шаблон таблицы -->
 		<div class="wrapper">
 			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
-			<table class="wp-list-table fixed">
+			<table class="wp-list-table widefat fixed">
 				<thead><?php echo colHeadHtml( $columns ); ?></thead>
 				<tfoot><?php echo colHeadHtml( $columns ); ?></tfoot>
 				<tbody><?php echo bodyHtml( $columns, $data ); ?></tbody>
@@ -725,15 +728,13 @@ class GeoSets extends DataBaseCustomData {
 	 *
 	 * @param $date
 	 *
-	 * @param bool $emtyTime if sets to datetime = '0000-00-00 00:00:00' return ''
+	 * @param bool $emptyTime if sets to datetime = '0000-00-00 00:00:00' return ''
 	 *
 	 * @return mixed
 	 */
-	public static function convertMysqlDateTime( $date, $emtyTime = true ) {
-		if ( $emtyTime ) {
-			if ( $date === '0000-00-00 00:00:00' ) {
-				return '';
-			}
+	public static function convertMysqlDateTime( $date, $emptyTime = true ) {
+		if ( $emptyTime && $date === '0000-00-00 00:00:00' ) {
+			return '';
 		} else {
 			return preg_replace( '/^(\d{4})-(\d{2})-(\d{2})/', '$3.$2.$1', $date );
 		}
