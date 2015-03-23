@@ -13,6 +13,10 @@ jQuery(function($) {
    * poligon on write
    */
   var poligon;
+  /**
+   * poligonRemoved flag
+   */
+  var poligonRemoved;
 
 
   /**
@@ -89,7 +93,8 @@ jQuery(function($) {
     });
 
     var block = $('.dateTimeWrapper-js');
-    if (info['start_time'] === emptyTime && info['end_time'] === emptyTime) {
+    if (typeof info === 'undefined' ||
+      (typeof info !== 'undefined' && info['start_time'] === emptyTime && info['end_time'] === emptyTime)) {
       unlim.val('1');
       unlim.attr('checked', true);
       block.hide();
@@ -264,10 +269,12 @@ jQuery(function($) {
       }
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
-        showPanel();
-        //setSelection(addShape);
-        //showMessage({action: 'new_action', state: 'success'}, 'Click on the area to save it');
 
+        if (!poligonRemoved) {
+          setSelection(addShape);
+        } else {
+          poligonRemoved = false;
+        }
         google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
         google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
@@ -288,15 +295,19 @@ jQuery(function($) {
       poligon = e.overlay;
       drawManager.setDrawingMode(null);
       poligon.setMap(null);
+      poligonRemoved = true;
       hidePanel();
+      return false;
     });
 
     google.maps.event.addDomListener(document, 'keyup', function(e) {
       var code = (e.keyCode ? e.keyCode : e.which);
       if (code === 27) {
+        poligonRemoved = true;
         drawManager.setDrawingMode(null);
         poligon.setMap(null);
         hidePanel();
+        return false;
       }
     });
 
@@ -460,16 +471,15 @@ jQuery(function($) {
   function showMessage(response, message) {
     var infoBlock = $('.info-block');
 
-    setTimeout(function() {
-      infoBlock.css("visibility", "hidden");
-    }, 3000);
-
     if (!response || response === '0') {
       infoBlock.html('Server error.');
       infoBlock.css("visibility", "visible");
       if (!infoBlock.hasClass('error')) {
         infoBlock.addClass('error').removeClass('success');
       }
+      setTimeout(function() {
+        infoBlock.css("visibility", "hidden");
+      }, 3000);
       return;
     }
 
@@ -486,6 +496,9 @@ jQuery(function($) {
         infoBlock.addClass('success').removeClass('error');
       }
     }
+    setTimeout(function() {
+      infoBlock.css("visibility", "hidden");
+    }, 3000);
   }
 
   /**
