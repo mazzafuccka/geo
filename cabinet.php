@@ -8,7 +8,7 @@ if ( ! $user_id ){
 	wp_die(__( 'Invalid user ID.' ) );
 }
 const IS_PROFILE_PAGE = true;
-$wp_http_referer= '/cabinet/';
+$wp_http_referer= get_site_url().'/cabinet/';
 $user_can_edit = true;
 
 if ( !current_user_can('edit_user', $user_id) )
@@ -300,7 +300,7 @@ wp_enqueue_script('user-profile');
 		<input type="hidden" name="action" value="update" />
 		<input type="hidden" name="user_id" id="user_id" value="<?php echo esc_attr($user_id); ?>" />
 		<input type="submit" value="<?php _e('Submit', GeoSets::CONTENT);?>"/>
-		<button type="button" onclick="window.location='/';"><?php _e('Cancel', GeoSets::CONTENT);?></button>
+		<button type="button" onclick="window.location='<?php echo get_site_url();?>';"><?php _e('Cancel', GeoSets::CONTENT);?></button>
 	</form>
 	<?php do_action('showTable');?>
 </main>
