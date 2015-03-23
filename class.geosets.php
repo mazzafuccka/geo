@@ -246,7 +246,10 @@ class GeoSets extends DataBaseCustomData {
 		$html = "
 		<!--content-->
         <div id='map'></div>
-        <div class='cabinet'><a href='/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a></div>
+        <div class='cabinet'>
+        <a href='./cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a> |
+        <a href='". wp_logout_url('/')."' title='Logout'>Logout</a>
+        </div>
         <div id='panel'>
             <div class='info'>
             <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>

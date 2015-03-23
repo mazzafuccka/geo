@@ -300,7 +300,7 @@ wp_enqueue_script('user-profile');
 		<input type="hidden" name="action" value="update" />
 		<input type="hidden" name="user_id" id="user_id" value="<?php echo esc_attr($user_id); ?>" />
 		<input type="submit" value="<?php _e('Submit', GeoSets::CONTENT);?>"/>
-
+		<button type="button" onclick="window.location='/';"><?php _e('Cancel', GeoSets::CONTENT);?></button>
 	</form>
 	<?php do_action('showTable');?>
 </main>
