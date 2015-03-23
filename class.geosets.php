@@ -636,7 +636,7 @@ class GeoSets extends DataBaseCustomData {
 			'end_time'    => __( 'End time', $content ),
 			'type'        => __( 'Type', $content ),
 			'points'      => __( 'Coordinates', $content ),
-			'modify_time' => __( 'Edit time', $content ),
+			'modify_time' => __( 'Modify time', $content ),
 			'status'      => __( 'Status', $content ),
 			'actions'     => __( 'Action', $content )
 		);
@@ -659,6 +659,9 @@ class GeoSets extends DataBaseCustomData {
 			$data = array_map(function($row){
 				$row['actions'] = '<a class="remove" href="#" data-id ="' . $row['id'] . '" >x</a>';
 				$row['type'] = GeoSets::getTypeListName( $row['type'] );
+				$row['start_time'] = GeoSets::convertMysqlDateTime($row['start_time']);
+				$row['end_time'] = GeoSets::convertMysqlDateTime($row['end_time']);
+				$row['modify_time'] = GeoSets::convertMysqlDateTime($row['modify_time']);
 				return $row;
 			}, $data);
 
@@ -695,5 +698,25 @@ class GeoSets extends DataBaseCustomData {
 			</table>
 		</div>
 	<?php
+	}
+
+	/**
+	 * Convert mysql format datetime to view format
+	 * 'dd.mm.yyyy hh:mm:ss' to 'yyyy-mm-dd hh:mm:ss'
+	 *
+	 * @param $date
+	 *
+	 * @param bool $emtyTime if sets to datetime = '0000-00-00 00:00:00' return ''
+	 *
+	 * @return mixed
+	 */
+	public static function convertMysqlDateTime( $date, $emtyTime = true ){
+		if($emtyTime){
+			if($date === '0000-00-00 00:00:00'){
+				return '';
+			}
+		} else {
+			return preg_replace('/^(\d{4})-(\d{2})-(\d{2})/', '$3.$2.$1', $date);
+		}
 	}
 }
