@@ -264,17 +264,16 @@ jQuery(function($) {
       }
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
-        poligon = e.overlay;
-        //showPanel();
+        showPanel();
         //setSelection(addShape);
         //showMessage({action: 'new_action', state: 'success'}, 'Click on the area to save it');
+
         google.maps.event.addListener(e.getPath(), 'set_at', pointUpdate);
         // change between point of poligon
         google.maps.event.addListener(e.getPath(), 'insert_at', pointUpdate);
         google.maps.event.addListener(e.getPath(), 'remove_at', function() {
           setSelection(addShape);
         });
-        //setTimeout(function(){setSelection(addShape);},0);
       });
       poligon = e.overlay;
     });
@@ -289,7 +288,7 @@ jQuery(function($) {
       poligon = e.overlay;
       drawManager.setDrawingMode(null);
       poligon.setMap(null);
-      //deleteSelectedShape(currectShape);
+      hidePanel();
     });
 
     google.maps.event.addDomListener(document, 'keyup', function(e) {
@@ -297,7 +296,7 @@ jQuery(function($) {
       if (code === 27) {
         drawManager.setDrawingMode(null);
         poligon.setMap(null);
-        //deleteSelectedShape(currectShape);
+        hidePanel();
       }
     });
 
@@ -463,7 +462,7 @@ jQuery(function($) {
 
     setTimeout(function() {
       infoBlock.css("visibility", "hidden");
-    }, 5000);
+    }, 3000);
 
     if (!response || response === '0') {
       infoBlock.html('Server error.');
