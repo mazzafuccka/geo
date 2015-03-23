@@ -51,6 +51,8 @@
     background-color: white;
     padding: 5px 10px;
 }
-
+.wrapper table tr td {
+    overflow: hidden;
+}
 
 

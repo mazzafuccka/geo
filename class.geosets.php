@@ -582,6 +582,7 @@ class GeoSets extends DataBaseCustomData {
 
 	/**
 	 * get Type name
+	 *
 	 * @param $id
 	 *
 	 * @return string
@@ -653,24 +654,32 @@ class GeoSets extends DataBaseCustomData {
 
 		function bodyHtml( $columns, $data ) {
 			//<td class="id column-id">22</td>
-			$html = '<tr>';
-			foreach ( $columns as $key => $row ) {
-				$value = '';
-				foreach ( $data as $v ) {
-					if ( isset( $v[ $key ] ) ) {
-						$value = $v[ $key ];
-					}
-					if ( $key === 'actions' ) {
-						$value = '<a class="remove" href="#" data-id ="' . $v['id'] . '" >x</a>';
-					}
-					if ( $key === 'type' ) {
-						$value = GeoSets::getTypeListName($v[ $key ]);
+			$html = '';
+			// mixin
+			$data = array_map(function($row){
+				$row['actions'] = '<a class="remove" href="#" data-id ="' . $row['id'] . '" >x</a>';
+				$row['type'] = GeoSets::getTypeListName( $row['type'] );
+				return $row;
+			}, $data);
+
+			foreach ( $data as $row ) {
+				$html .= '<tr>';
+				$td = array();
+
+				foreach ( $row as $key => $element ) {
+					foreach ( $columns as $k => $v ) {
+						if ( $k === $key ) {
+							$td[ $key ] = '<td class="column-' . $key . '">' . $element . '</td>';
+						}
 					}
 				}
 
-				$html .= '<td class="column-' . $key . '">' . $value . '</td>';
+				foreach ( $columns as $k => $v ) {
+					$html .= $td[ $k ];
+				}
+
+				$html .= '</tr>';
 			}
-			$html .= '</tr>';
 
 			return $html;
 		}
