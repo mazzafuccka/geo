@@ -81,6 +81,21 @@ class GeoSets extends DataBaseCustomData {
 
 		//cabinet page template
 		add_filter( 'page_template', array( 'geoSets', 'geo_cabinet_page_template' ) );
+
+		// register form  additional fields
+		add_action( 'register_form',  array( 'geoSets', 'geo_show_extra_register_fields' ) );
+		add_action( 'register_post',  array( 'geoSets', 'geo_check_extra_register_fields' ), 10, 3 );
+		add_action( 'user_register',  array( 'geoSets', 'geo_register_extra_fields'), 100 );
+		add_filter( 'gettext', array( 'geoSets', 'change_email_reg_text' ), 20, 3 );
+
+		/* redirect users to front page after login */
+		function redirect_to_front_page() {
+			global $redirect_to;
+			if (!isset($_GET['redirect_to'])) {
+				$redirect_to = get_option('siteurl');
+			}
+		}
+		add_action('login_form', 'redirect_to_front_page');
 	}
 
 	/**
@@ -245,10 +260,10 @@ class GeoSets extends DataBaseCustomData {
 		global $current_user;
 		$html = "
 		<!--content-->
-        <div id='map'>".home_url()."</div>
+        <div id='map'>" . home_url() . "</div>
         <div class='cabinet '>
-        <a href='". get_site_url()."/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a> |
-        <a href='". wp_logout_url(home_url())."' title='Logout'>Logout</a>
+        <a href='" . get_site_url() . "/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a> |
+        <a href='" . wp_logout_url( home_url() ) . "' title='Logout'>Logout</a>
         </div>
         <div id='panel'>
             <div class='info'>
@@ -659,14 +674,15 @@ class GeoSets extends DataBaseCustomData {
 			//<td class="id column-id">22</td>
 			$html = '';
 			// mixin
-			$data = array_map(function($row){
-				$row['actions'] = '<a class="remove" href="#" data-id ="' . $row['id'] . '" >x</a>';
-				$row['type'] = GeoSets::getTypeListName( $row['type'] );
-				$row['start_time'] = GeoSets::convertMysqlDateTime($row['start_time']);
-				$row['end_time'] = GeoSets::convertMysqlDateTime($row['end_time']);
-				$row['modify_time'] = GeoSets::convertMysqlDateTime($row['modify_time']);
+			$data = array_map( function ( $row ) {
+				$row['actions']     = '<a class="remove" href="#" data-id ="' . $row['id'] . '" >x</a>';
+				$row['type']        = GeoSets::getTypeListName( $row['type'] );
+				$row['start_time']  = GeoSets::convertMysqlDateTime( $row['start_time'] );
+				$row['end_time']    = GeoSets::convertMysqlDateTime( $row['end_time'] );
+				$row['modify_time'] = GeoSets::convertMysqlDateTime( $row['modify_time'] );
+
 				return $row;
-			}, $data);
+			}, $data );
 
 			foreach ( $data as $row ) {
 				$html .= '<tr>';
@@ -713,13 +729,86 @@ class GeoSets extends DataBaseCustomData {
 	 *
 	 * @return mixed
 	 */
-	public static function convertMysqlDateTime( $date, $emtyTime = true ){
-		if($emtyTime){
-			if($date === '0000-00-00 00:00:00'){
+	public static function convertMysqlDateTime( $date, $emtyTime = true ) {
+		if ( $emtyTime ) {
+			if ( $date === '0000-00-00 00:00:00' ) {
 				return '';
 			}
 		} else {
-			return preg_replace('/^(\d{4})-(\d{2})-(\d{2})/', '$3.$2.$1', $date);
+			return preg_replace( '/^(\d{4})-(\d{2})-(\d{2})/', '$3.$2.$1', $date );
 		}
 	}
+
+	/**
+	 * Remove the text at the bottom of the Custom fields box in WordPress Post/Page Editor.
+	 *
+	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/gettext
+	 */
+	public static function change_email_reg_text( $translated_text, $untranslated_text, $domain ) {
+
+		$custom_field_text = 'A password will be e-mailed to you.';
+
+		if ( $untranslated_text === $custom_field_text ) {
+			return __( 'If you leave password fields empty one will be generated for you. Password must be at least eight characters long.' );
+		}
+
+		return $translated_text;
+	}
+
+	/**
+	 * Reg extra field in registration
+	 * @param int $user_id update user date fields
+	 */
+	public static function geo_register_extra_fields( $user_id ) {
+		$userdata = array();
+
+		$userdata['ID']          = $user_id;
+		$userdata['description'] = $_POST['description'];
+
+		if ( $_POST['password'] !== '' ) {
+			$userdata['user_pass'] = $_POST['password'];
+		}
+		$new_user_id = wp_update_user( $userdata );
+	}
+
+	/**
+	 *
+	 */
+	public static function geo_show_extra_register_fields() {
+		?>
+		<p>
+			<label for="password"><?php _e( 'Password' ); ?><br/>
+				<input id="password" class="input" type="password" tabindex="30" size="25" value=""
+				       name="password"/>
+			</label>
+		</p>
+		<p>
+			<label for="repeat_password"><?php _e( 'Repeat New Password' ); ?><br/>
+				<input id="repeat_password" class="input" type="password" tabindex="40" size="25" value=""
+				       name="repeat_password"/>
+			</label>
+		</p>
+		<p>
+			<label for="description"><?php _e( 'Biographical Info' ); ?><br/>
+				<textarea id="description" style="font-size:14px;" class="input" rows="10" name="description"></textarea>
+			</label>
+		</p>
+	<?php
+	}
+
+	/**
+	 * Check the form for errors
+	 * @param $login
+	 * @param $email
+	 * @param $errors
+	 */
+	public static function geo_check_extra_register_fields( $login, $email, $errors ) {
+		if ( $_POST['password'] !== $_POST['repeat_password'] ) {
+			$errors->add( 'passwords_not_matched', "<strong>ERROR</strong>: Passwords must match" );
+		}
+		if ( strlen( $_POST['password'] ) < 8 ) {
+			$errors->add( 'password_too_short', "<strong>ERROR</strong>: Passwords must be at least eight characters long" );
+		}
+	}
+
 }
