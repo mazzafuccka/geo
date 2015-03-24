@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geoSets\n"
-"POT-Creation-Date: 2015-03-24 09:42+0500\n"
-"PO-Revision-Date: 2015-03-24 09:42+0500\n"
+"POT-Creation-Date: 2015-03-24 09:51+0500\n"
+"PO-Revision-Date: 2015-03-24 09:52+0500\n"
 "Last-Translator: \n"
 "Language-Team: drdim <dr.dim.pro@gmail.com>\n"
 "Language: ru_RU\n"
@@ -89,7 +89,7 @@ msgstr "Гео Объекты"
 msgid "Settings"
 msgstr "Настройки"
 
-#: ../class.geosets.php:241 ../class.geosets.php:707
+#: ../class.geosets.php:241 ../class.geosets.php:714
 msgid "Your points"
 msgstr "Ваши области"
 
@@ -157,7 +157,11 @@ msgstr "Сохранить изменения"
 msgid "Modify time"
 msgstr "Последнее изменение"
 
-#: ../class.geosets.php:745
+#: ../class.geosets.php:674
+msgid "Elements not found."
+msgstr "Ничего не найдено."
+
+#: ../class.geosets.php:752
 msgid ""
 "If you leave password fields empty one will be generated for you. Password "
 "must be at least eight characters long."
@@ -165,14 +169,14 @@ msgstr ""
 "Если вы оставите поля пароля пустым - будет сгенерирован для Вас. Пароль "
 "должен быть длиной не менее восьми символов."
 
-#: ../class.geosets.php:773
+#: ../class.geosets.php:780
 msgid "Password"
 msgstr "Пароль"
 
-#: ../class.geosets.php:779
+#: ../class.geosets.php:786
 msgid "Repeat New Password"
 msgstr "Повторите ввод пароля"
 
-#: ../class.geosets.php:785
+#: ../class.geosets.php:792
 msgid "Biographical Info"
 msgstr "Обо мне"

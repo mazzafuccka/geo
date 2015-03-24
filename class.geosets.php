@@ -668,6 +668,12 @@ class GeoSets extends DataBaseCustomData {
 		function bodyHtml( $columns, $data ) {
 			//<td class="id column-id">22</td>
 			$html = '';
+
+			if ( empty( $data ) ) {
+				$countColumns = count( $columns );
+				return '<tr><td class="colspanchange" colspan="' . $countColumns . '">' . __('Elements not found.', GeoSets::CONTENT).'</td></tr>';
+			}
+
 			// mixin
 			$data = array_map( function ( $row ) {
 				$row['actions']     = '<a class="remove" href="#" data-id ="' . $row['id'] . '" >x</a>';
@@ -695,6 +701,7 @@ class GeoSets extends DataBaseCustomData {
 					$html .= $td[ $k ];
 				}
 
+
 				$html .= '</tr>';
 			}
 
@@ -702,7 +709,7 @@ class GeoSets extends DataBaseCustomData {
 		}
 
 		?>
-		<!-- ������ ������� -->
+		<!-- table -->
 		<div class="wrapper">
 			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
 			<table class="wp-list-table widefat fixed">
