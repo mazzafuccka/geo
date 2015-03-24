@@ -201,4 +201,35 @@ abstract class DataBaseCustomData {
 			return '%s';
 		}
 	}
+
+	/**
+	 * Search matest
+	 *
+	 * @param $user_id
+	 *
+	 * @return array
+	 */
+	public function getLastShapeByUserId( $user_id ) {
+		global $wpdb;
+
+		$addWhere = ' and (end_time > NOW() or end_time is NULL) and status = 1';
+
+		if ( ! empty( $user_id ) ) {
+			$sql = $wpdb->prepare( 'SELECT
+				id,
+				user_id,
+				name,
+				modify_time,
+				start_time,
+				end_time,
+				AsText(points) as points,
+				description,
+				type,
+				status
+ 			FROM ' . $this->tableName . ' WHERE user_id = %d ' . $addWhere . ' ORDER BY modify_time DESC LIMIT 1 ', $user_id );
+			return $wpdb->get_results( $sql, ARRAY_A );
+		}
+
+		return array();
+	}
 }

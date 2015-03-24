@@ -330,7 +330,8 @@ class GeoSets extends DataBaseCustomData {
 				'nonce'    => wp_create_nonce( 'token_action' ),
 				'user_id'  => get_current_user_id(),
 				'limit'    => get_option( 'limit' ),
-				'lang'     => explode('_', get_locale())[0]
+				'lang'     => explode('_', get_locale())[0],
+				'coord'    => self::get_user_last_point(get_current_user_id())
 			)
 		);
 
@@ -833,6 +834,23 @@ class GeoSets extends DataBaseCustomData {
 				'm_limit'      => __( 'Limit point on shape! Use less then ', self::CONTENT)
 			)
 		);
+	}
+
+	/**
+	 * @param $id
+	 *
+	 * @return array
+	 */
+	public static function get_user_last_point($id){
+		if($id){
+			$db = new GeoSets();
+			$result = $db->getLastShapeByUserId($id);
+			$result = !empty($result) && isset($result[0]) ? $result[0] : null;
+			return isset($result['points']) ? $result['points'] : '';
+		} else {
+			return '';
+		}
+
 	}
 
 }

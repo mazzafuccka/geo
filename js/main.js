@@ -193,16 +193,32 @@ jQuery(function($) {
       disableDefaultUI: true,
       zoomControl: true
     });
-    var defaultGeo = new google.maps.LatLng(55.75222, 37.61556);
+
+    var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
+
     // geolocation center
-    if (navigator.geolocation) {
+    if(typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0){
+      var coordConverted = convertCoord(ajax_object.coord);
+      var coordAr = [];
+      var coordSplit = coordConverted.split(',');
+      for (var i = 0; i < coordSplit.length; i++) {
+        var elem = coordSplit[i].split(' ');
+        coordAr.push(new google.maps.LatLng(elem[0], elem[1]));
+      }
+      var centerPoligon  = new google.maps.Polygon({
+        path: coordAr
+      });
+      map.setCenter(polygonCenter(centerPoligon));
+    }
+    else if (navigator.geolocation) {
       var showPosition = function(position) {
         map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
       };
       navigator.geolocation.getCurrentPosition(showPosition, function() {
         map.setCenter(defaultGeo);
       });
-    } else {
+    }
+    else {
       // default city
       map.setCenter(defaultGeo);
     }
@@ -311,6 +327,36 @@ jQuery(function($) {
         return false;
       }
     });
+
+    /**
+     * get Center poligon
+     * @param poly
+     * @returns {google.maps.LatLng}
+     */
+    function polygonCenter(poly) {
+      var lowx,
+        highx,
+        lowy,
+        highy,
+        lats = [],
+        lngs = [],
+        vertices = poly.getPath();
+
+      for(var i=0; i<vertices.length; i++) {
+        lngs.push(vertices.getAt(i).lng());
+        lats.push(vertices.getAt(i).lat());
+      }
+
+      lats.sort();
+      lngs.sort();
+      lowx = lats[0];
+      highx = lats[vertices.length - 1];
+      lowy = lngs[0];
+      highy = lngs[vertices.length - 1];
+      center_x = lowx + ((highx-lowx) / 2);
+      center_y = lowy + ((highy - lowy) / 2);
+      return (new google.maps.LatLng(center_x, center_y));
+    }
 
     /* Load poligons from user save data*/
     var newPolygons = [];
