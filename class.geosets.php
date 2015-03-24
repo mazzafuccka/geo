@@ -753,7 +753,7 @@ class GeoSets extends DataBaseCustomData {
 		$custom_field_text = 'A password will be e-mailed to you.';
 
 		if ( $untranslated_text === $custom_field_text ) {
-			return __( 'If you leave password fields empty one will be generated for you. Password must be at least eight characters long.' );
+			return __( 'If you leave password fields empty one will be generated for you. Password must be at least eight characters long.', self::CONTENT );
 		}
 
 		return $translated_text;
@@ -781,19 +781,19 @@ class GeoSets extends DataBaseCustomData {
 	public static function geo_show_extra_register_fields() {
 		?>
 		<p>
-			<label for="password"><?php _e( 'Password' ); ?><br/>
+			<label for="password"><?php _e( 'Password', self::CONTENT ); ?><br/>
 				<input id="password" class="input" type="password" tabindex="30" size="25" value=""
 				       name="password"/>
 			</label>
 		</p>
 		<p>
-			<label for="repeat_password"><?php _e( 'Repeat New Password' ); ?><br/>
+			<label for="repeat_password"><?php _e( 'Repeat New Password', self::CONTENT ); ?><br/>
 				<input id="repeat_password" class="input" type="password" tabindex="40" size="25" value=""
 				       name="repeat_password"/>
 			</label>
 		</p>
 		<p>
-			<label for="description"><?php _e( 'Biographical Info' ); ?><br/>
+			<label for="description"><?php _e( 'Biographical Info', self::CONTENT ); ?><br/>
 				<textarea id="description" style="font-size:14px;" class="input" rows="10" name="description"></textarea>
 			</label>
 		</p>
@@ -808,10 +808,12 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_check_extra_register_fields( $login, $email, $errors ) {
 		if ( $_POST['password'] !== $_POST['repeat_password'] ) {
-			$errors->add( 'passwords_not_matched', "<strong>ERROR</strong>: Passwords must match" );
+			$errorMessage = __( '<strong>ERROR</strong>: Passwords must match', self::CONTENT );
+			$errors->add( 'passwords_not_matched', $errorMessage );
 		}
 		if ( strlen( $_POST['password'] ) < 8 ) {
-			$errors->add( 'password_too_short', "<strong>ERROR</strong>: Passwords must be at least eight characters long" );
+			$errorMessage = __( '<strong>ERROR</strong>: Passwords must be at least eight characters long', self::CONTENT );
+			$errors->add( 'password_too_short', $errorMessage );
 		}
 	}
 

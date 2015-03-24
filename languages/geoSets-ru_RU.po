@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geoSets\n"
-"POT-Creation-Date: 2015-03-24 10:15+0500\n"
-"PO-Revision-Date: 2015-03-24 10:17+0500\n"
+"POT-Creation-Date: 2015-03-24 10:20+0500\n"
+"PO-Revision-Date: 2015-03-24 10:21+0500\n"
 "Last-Translator: \n"
 "Language-Team: drdim <dr.dim.pro@gmail.com>\n"
 "Language: ru_RU\n"
@@ -167,7 +167,7 @@ msgid ""
 "must be at least eight characters long."
 msgstr ""
 "Если вы оставите поля пароля пустым - будет сгенерирован для Вас. Пароль "
-"должен быть длиной не менее восьми символов."
+"должен быть длиной не менее 8 символов."
 
 #: ../class.geosets.php:784
 msgid "Password"
@@ -181,26 +181,35 @@ msgstr "Повторите ввод пароля"
 msgid "Biographical Info"
 msgstr "Обо мне"
 
-#: ../class.geosets.php:825
+#: ../class.geosets.php:811
+msgid "<strong>ERROR</strong>: Passwords must match"
+msgstr "<strong>Ошибка</strong>: Пароли должны совпадать"
+
+#: ../class.geosets.php:815
+msgid ""
+"<strong>ERROR</strong>: Passwords must be at least eight characters long"
+msgstr "<strong>Ошибка</strong>: Длина пароля должна быть не менее 8 символов"
+
+#: ../class.geosets.php:827
 msgid "Saved."
 msgstr "Сохранено."
 
-#: ../class.geosets.php:826
+#: ../class.geosets.php:828
 msgid "Deleted."
 msgstr "Удалено."
 
-#: ../class.geosets.php:827
+#: ../class.geosets.php:829
 msgid "Server Error."
 msgstr "Ошибка сервера."
 
-#: ../class.geosets.php:828
+#: ../class.geosets.php:830
 msgid "Error save data on server. Try again leter."
 msgstr "Ошибка сохранения данных на сервере. Повторите попытку позже."
 
-#: ../class.geosets.php:829
+#: ../class.geosets.php:831
 msgid "Row deleted!"
 msgstr "Строка удалена!"
 
-#: ../class.geosets.php:830
+#: ../class.geosets.php:832
 msgid "Your have delete?"
 msgstr "Вы действительно хотите удалить?"
