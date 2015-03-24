@@ -829,7 +829,8 @@ class GeoSets extends DataBaseCustomData {
 				'm_error'      => __( 'Server Error.', self::CONTENT ),
 				'm_fail_error' => __( 'Error save data on server. Try again leter.', self::CONTENT ),
 				'm_row_delete' => __( 'Row deleted!', self::CONTENT ),
-				'm_confirm'    => __( 'Your have delete?', self::CONTENT )
+				'm_confirm'    => __( 'Your have delete?', self::CONTENT ),
+				'm_limit'      => __( 'Limit point on shape! Use less then ', self::CONTENT)
 			)
 		);
 	}

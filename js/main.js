@@ -243,7 +243,8 @@ jQuery(function($) {
       //showPanel();
       //check point limit
       var objLimit = e.overlay.getPath().getArray().length,
-        message = 'Limit point on shape! Use less then ' + ajax_object.limit;
+        tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape! Use less then ',
+      message = tMessage + ajax_object.limit;
 
       if (objLimit > +ajax_object.limit) {
         alert(message);
@@ -372,7 +373,8 @@ jQuery(function($) {
       google.maps.event.addListener(newPoly, 'click', function() {
 
         var loadpointsLimit = newPoly.getPath().getArray().length,
-          message = 'Limit point on shape! Use less then ' + ajax_object.limit;
+          tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape! Use less then ',
+          message = tMessage + ajax_object.limit;
 
         function pointUpdate(index) {
           var length = this.getArray().length;

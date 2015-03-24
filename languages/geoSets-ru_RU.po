@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geoSets\n"
-"POT-Creation-Date: 2015-03-24 10:20+0500\n"
-"PO-Revision-Date: 2015-03-24 10:21+0500\n"
+"POT-Creation-Date: 2015-03-24 19:16+0500\n"
+"PO-Revision-Date: 2015-03-24 19:16+0500\n"
 "Last-Translator: \n"
 "Language-Team: drdim <dr.dim.pro@gmail.com>\n"
 "Language: ru_RU\n"
@@ -213,3 +213,7 @@ msgstr "Строка удалена!"
 #: ../class.geosets.php:832
 msgid "Your have delete?"
 msgstr "Вы действительно хотите удалить?"
+
+#: ../class.geosets.php:833
+msgid "Limit point on shape! Use less then "
+msgstr "Превышен лимит точек на  объект. Используйте менее чем "
