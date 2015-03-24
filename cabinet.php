@@ -9,8 +9,8 @@ if ( ! $user_id ){
 }
 ?>
 <div class="wrapper">
-	<a href="<?php echo home_url();?>">home on map</a>
-	<h1>User profile</h1>
+	<a href="<?php echo home_url();?>" title="<?php _e('Go to map', GeoSets::CONTENT); ?>"><?php _e('Main Page', GeoSets::CONTENT); ?></a>
+	<h1><?php _e('User profile', GeoSets::CONTENT);?></h1>
 	<?php echo do_shortcode( '[wppb-edit-profile]' );
 	if(do_shortcode( '[wppb-edit-profile]' )){
 	?><button type="button" onclick="window.location='<?php echo home_url();?>';"><?php _e('Cancel', GeoSets::CONTENT);?></button><?php

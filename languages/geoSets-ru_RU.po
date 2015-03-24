@@ -1,0 +1,178 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: geoSets\n"
+"POT-Creation-Date: 2015-03-24 09:42+0500\n"
+"PO-Revision-Date: 2015-03-24 09:42+0500\n"
+"Last-Translator: \n"
+"Language-Team: drdim <dr.dim.pro@gmail.com>\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.5\n"
+"X-Poedit-Basepath: .\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../cabinet.php:8
+msgid "Invalid user ID."
+msgstr "Недействительный идентификатор пользователя"
+
+#: ../cabinet.php:12
+msgid "Go to map"
+msgstr "Вернуться на карту"
+
+#: ../cabinet.php:12
+msgid "Main Page"
+msgstr "Главная страница"
+
+#: ../cabinet.php:13
+msgid "User profile"
+msgstr "Информация пользователя"
+
+#: ../cabinet.php:16
+msgid "Cancel"
+msgstr "Отмена"
+
+#: ../class.geolist-tables.php:35 ../class.geosets.php:645
+msgid "#"
+msgstr "#"
+
+#: ../class.geolist-tables.php:36 ../class.geosets.php:277
+#: ../class.geosets.php:646
+msgid "Name"
+msgstr "Имя"
+
+#: ../class.geolist-tables.php:37 ../class.geosets.php:293
+#: ../class.geosets.php:647
+msgid "Description"
+msgstr "Описание"
+
+#: ../class.geolist-tables.php:38 ../class.geosets.php:284
+#: ../class.geosets.php:648
+msgid "Start time"
+msgstr "Начало"
+
+#: ../class.geolist-tables.php:39 ../class.geosets.php:287
+#: ../class.geosets.php:649
+msgid "End time"
+msgstr "Конец"
+
+#: ../class.geolist-tables.php:40 ../class.geosets.php:650
+msgid "Type"
+msgstr "Тип"
+
+#: ../class.geolist-tables.php:41 ../class.geosets.php:651
+msgid "Coordinates"
+msgstr "Координаты"
+
+#: ../class.geolist-tables.php:42
+msgid "Edit time"
+msgstr "Время изменения"
+
+#: ../class.geolist-tables.php:43 ../class.geosets.php:653
+msgid "Status"
+msgstr "Статус"
+
+#: ../class.geolist-tables.php:44 ../class.geosets.php:654
+msgid "Action"
+msgstr "Действия"
+
+#: ../class.geosets.php:187 ../class.geosets.php:188
+msgid "List Points"
+msgstr "Гео Объекты"
+
+#: ../class.geosets.php:198 ../class.geosets.php:199
+msgid "Settings"
+msgstr "Настройки"
+
+#: ../class.geosets.php:241 ../class.geosets.php:707
+msgid "Your points"
+msgstr "Ваши области"
+
+#: ../class.geosets.php:266
+msgid "Cabinet"
+msgstr "Личный кабинет"
+
+#: ../class.geosets.php:267
+msgid "Logout"
+msgstr "Выйти"
+
+#: ../class.geosets.php:274
+msgid "Edit Object"
+msgstr "Изменение объекта"
+
+#: ../class.geosets.php:281
+msgid "Unlimited time"
+msgstr "Неограниченное время"
+
+#: ../class.geosets.php:291
+msgid "Type object"
+msgstr "Тип"
+
+#: ../class.geosets.php:305
+msgid "Save"
+msgstr "Сохранить"
+
+#: ../class.geosets.php:306
+msgid "Delete"
+msgstr "Удалить"
+
+#: ../class.geosets.php:540
+msgid "Geo settings"
+msgstr "Настройки геообъекта"
+
+#: ../class.geosets.php:546
+msgid "Geo object limit"
+msgstr "Лимит точек у объекта"
+
+#: ../class.geosets.php:550
+msgid "Limit user sets on one page on one object"
+msgstr ""
+"Устанавливает лимит количества точек у одного полигона в объекте, если "
+"больше, выдается сообщение об ошибке создания такого объекта с указанным "
+"лимитом"
+
+#: ../class.geosets.php:556
+msgid "Options types"
+msgstr "Список типов"
+
+#: ../class.geosets.php:561
+msgid ""
+"Set options type for select dropdown, user \"code value\" [space] "
+"\"description\" on one row.<br/>View example:<br/> 15 Type1<br/> 20 Type2"
+msgstr ""
+"Устанавливает список типов объектов карты в выпадающий список, используйте в "
+"формате \"Индификатор\" [пробел] \"Описание поле\"  по одной записи на "
+"строку.<br/>Пример:<br/> 1 Красный<br/> 2 Зеленый"
+
+#: ../class.geosets.php:568
+msgid "Save Changes"
+msgstr "Сохранить изменения"
+
+#: ../class.geosets.php:652
+msgid "Modify time"
+msgstr "Последнее изменение"
+
+#: ../class.geosets.php:745
+msgid ""
+"If you leave password fields empty one will be generated for you. Password "
+"must be at least eight characters long."
+msgstr ""
+"Если вы оставите поля пароля пустым - будет сгенерирован для Вас. Пароль "
+"должен быть длиной не менее восьми символов."
+
+#: ../class.geosets.php:773
+msgid "Password"
+msgstr "Пароль"
+
+#: ../class.geosets.php:779
+msgid "Repeat New Password"
+msgstr "Повторите ввод пароля"
+
+#: ../class.geosets.php:785
+msgid "Biographical Info"
+msgstr "Обо мне"

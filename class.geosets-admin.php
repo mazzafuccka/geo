@@ -49,6 +49,7 @@ class GeoSetsAdmin {
 	private static function init_hooks() {
 		self::$initiated = true;
 		self::load_scripts();
+        load_plugin_textdomain( GeoSets::CONTENT, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
 	/**

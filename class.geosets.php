@@ -65,7 +65,6 @@ class GeoSets extends DataBaseCustomData {
 		}
 		// Hook for adding admin menus
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
-		add_action( 'plugins_loaded', array( 'GeoSets', 'geo_load_textdomain' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
 		add_action( 'showTable', array( 'GeoSets', 'showTable' ) );
 		//call register settings function
@@ -96,6 +95,8 @@ class GeoSets extends DataBaseCustomData {
 			}
 		}
 		add_action('login_form', 'redirect_to_front_page');
+
+        load_plugin_textdomain( GeoSets::CONTENT, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
 	/**
@@ -235,7 +236,7 @@ class GeoSets extends DataBaseCustomData {
 		$data = $db->getByUserId( $current_user->ID );
 
 		?>
-		<!-- Шаблон -->
+
 		<div class="wrapper">
 			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
 			<?php
@@ -263,7 +264,7 @@ class GeoSets extends DataBaseCustomData {
         <div id='map'>" . home_url() . "</div>
         <div class='cabinet '>
         <a href='" . get_site_url() . "/cabinet/'>" . __( 'Cabinet', GeoSets::CONTENT ) . "</a> |
-        <a href='" . wp_logout_url( home_url() ) . "' title='Logout'>Logout</a>
+        <a href='" . wp_logout_url( home_url() ) . "' title='" . __( 'Logout', GeoSets::CONTENT ) . "'>" . __( 'Logout', GeoSets::CONTENT ) . "</a>
         </div>
 
         <div class='info-block error' style='visibility:hidden;'></div>
@@ -342,15 +343,6 @@ class GeoSets extends DataBaseCustomData {
 	public static function load_styles() {
 		wp_enqueue_style( 'mainCss', plugins_url( '/css/index.css', __FILE__ ) );
 		wp_enqueue_style( 'datetime', plugins_url( '/css/jquery.datetimepicker.css', __FILE__ ) );
-	}
-
-	/**
-	 * Load plugin textdomain.
-	 *
-	 * @since 1.0.0
-	 */
-	function geo_load_textdomain() {
-		load_plugin_textdomain( 'geoSets', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
@@ -710,7 +702,7 @@ class GeoSets extends DataBaseCustomData {
 		}
 
 		?>
-		<!-- Шаблон таблицы -->
+		<!-- пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ -->
 		<div class="wrapper">
 			<h2><?php _e( 'Your points', $content ) ?>, <?php echo $current_user->display_name; ?></h2>
 			<table class="wp-list-table widefat fixed">
