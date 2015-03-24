@@ -1,4 +1,4 @@
-/*global $, google, ajax_object */
+/*global $, google, ajax_object, translate */
 jQuery(function($) {
 
   /**
@@ -399,7 +399,7 @@ jQuery(function($) {
 
   google.maps.event.addDomListener(window, 'load', initialize);
 
-  var lang = null;//mapsData.lang
+  var lang = ajax_object.lang;
   //datetime picker
   $(function() {
     $('#date_timepicker_start').datetimepicker({
@@ -438,12 +438,12 @@ jQuery(function($) {
       hidePanel();
       switch (response.action) {
         case 'delete_action' :
-          message = 'Deleted.';
+          message = typeof translate !== 'undefined' ? translate.m_deleted : 'Deleted.';
           deleteSelectedShape();
           break;
         case 'edit_action' :
         case 'new_action' :
-          message = 'Saved.';
+          message = typeof translate !== 'undefined' ? translate.m_save : 'Saved.';
           var infoData = deserialize(data);
           console.log(infoData);
           if (infoData.start_time) infoData.start_time = convertDateMysqlFormat(infoData.start_time);
@@ -472,7 +472,8 @@ jQuery(function($) {
     var infoBlock = $('.info-block');
 
     if (!response || response === '0') {
-      infoBlock.html('Server error.');
+      var tMessage = typeof translate !== 'undefined' ? translate.m_error : 'Server error.';
+      infoBlock.html(tMessage);
       infoBlock.css("visibility", "visible");
       if (!infoBlock.hasClass('error')) {
         infoBlock.addClass('error').removeClass('success');
@@ -519,6 +520,8 @@ jQuery(function($) {
     return obj;
   }
 
+  var failMessage = typeof translate !== 'undefined' ? translate.m_fail_error : 'Error save data on server. Try again leter.';
+
   // ajax save or change
   $('#save-button').click(function() {
     var form = $('#object_form');
@@ -526,7 +529,7 @@ jQuery(function($) {
     $.post(ajax_object.ajax_url, data, function(response) {
       responseData(response, data);
     }).error(function() {
-      alert('Error save data on server/ try again leter/');
+      alert(failMessage);
     });
   });
 
@@ -544,7 +547,7 @@ jQuery(function($) {
     $.post(ajax_object.ajax_url, form.serialize(), function(response) {
       responseData(response);
     }).error(function() {
-      alert('Error delete data on server/ try again leter/');
+      alert(failMessage);
     });
   });
 
@@ -568,8 +571,8 @@ jQuery(function($) {
   //delete element from table
   $('.wp-list-table').find('a.remove').click(function(e) {
     e.preventDefault();
-
-    if (confirm('Your have delete?')) {
+    var cMessage = typeof translate !== 'undefined' ? translate : 'Your have delete?';
+    if (confirm(cMessage)) {
       var id = $(this).attr('data-id');
       var data = {
         id: id,
@@ -580,11 +583,12 @@ jQuery(function($) {
       };
       $.post(ajax_object.ajax_url, data, function(response) {
         if (response.state == 'success' && !response.error.length > 0) {
-          alert('Row deleted!');
+          var tMessage = typeof translate !== 'undefined' ? translate.m_row_delete : 'Row deleted!';
+          alert(tMessage);
           location.reload()
         }
       }).error(function() {
-        alert('Error delete data on server/ try again leter/');
+        alert(failMessage);
       });
     }
   });

@@ -329,9 +329,13 @@ class GeoSets extends DataBaseCustomData {
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'token_action' ),
 				'user_id'  => get_current_user_id(),
-				'limit'    => get_option( 'limit' )
+				'limit'    => get_option( 'limit' ),
+				'lang'     => explode('_', get_locale())[0]
 			)
 		);
+
+		// js data translated messages
+		self::translation_js_message();
 
 		//css
 		self::load_styles();
@@ -809,6 +813,23 @@ class GeoSets extends DataBaseCustomData {
 		if ( strlen( $_POST['password'] ) < 8 ) {
 			$errors->add( 'password_too_short', "<strong>ERROR</strong>: Passwords must be at least eight characters long" );
 		}
+	}
+
+	/**
+	 * Translate messages
+	 */
+	public static function translation_js_message() {
+		// add info
+		wp_localize_script( 'geo', 'translate',
+			array(
+				'm_save'       => __( 'Saved.', self::CONTENT ),
+				'm_deleted'    => __( 'Deleted.', self::CONTENT ),
+				'm_error'      => __( 'Server Error.', self::CONTENT ),
+				'm_fail_error' => __( 'Error save data on server. Try again leter.', self::CONTENT ),
+				'm_row_delete' => __( 'Row deleted!', self::CONTENT ),
+				'm_confirm'    => __( 'Your have delete?', self::CONTENT )
+			)
+		);
 	}
 
 }
