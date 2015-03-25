@@ -107,7 +107,7 @@ abstract class DataBaseCustomData {
 		$columns_string = implode( ',', $string );
 		array_push( $values, $id );
 
-		$sql     = $wpdb->prepare(
+		$sql = $wpdb->prepare(
 			"UPDATE $this->tableName SET $columns_string WHERE id = %d",
 			$values
 		);
@@ -227,6 +227,7 @@ abstract class DataBaseCustomData {
 				type,
 				status
  			FROM ' . $this->tableName . ' WHERE user_id = %d ' . $addWhere . ' ORDER BY modify_time DESC LIMIT 1 ', $user_id );
+
 			return $wpdb->get_results( $sql, ARRAY_A );
 		}
 

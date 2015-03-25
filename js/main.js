@@ -197,7 +197,7 @@ jQuery(function($) {
     var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
 
     // geolocation center
-    if(typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0){
+    if (typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0) {
       var coordConverted = convertCoord(ajax_object.coord);
       var coordAr = [];
       var coordSplit = coordConverted.split(',');
@@ -205,7 +205,7 @@ jQuery(function($) {
         var elem = coordSplit[i].split(' ');
         coordAr.push(new google.maps.LatLng(elem[0], elem[1]));
       }
-      var centerPoligon  = new google.maps.Polygon({
+      var centerPoligon = new google.maps.Polygon({
         path: coordAr
       });
       map.setCenter(polygonCenter(centerPoligon));
@@ -260,7 +260,7 @@ jQuery(function($) {
       //check point limit
       var objLimit = e.overlay.getPath().getArray().length,
         tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape! Use less then ',
-      message = tMessage + ajax_object.limit;
+        message = tMessage + ajax_object.limit;
 
       if (objLimit > +ajax_object.limit) {
         alert(message);
@@ -342,7 +342,7 @@ jQuery(function($) {
         lngs = [],
         vertices = poly.getPath();
 
-      for(var i=0; i<vertices.length; i++) {
+      for (var i = 0; i < vertices.length; i++) {
         lngs.push(vertices.getAt(i).lng());
         lats.push(vertices.getAt(i).lat());
       }
@@ -353,7 +353,7 @@ jQuery(function($) {
       highx = lats[vertices.length - 1];
       lowy = lngs[0];
       highy = lngs[vertices.length - 1];
-      center_x = lowx + ((highx-lowx) / 2);
+      center_x = lowx + ((highx - lowx) / 2);
       center_y = lowy + ((highy - lowy) / 2);
       return (new google.maps.LatLng(center_x, center_y));
     }
@@ -370,8 +370,8 @@ jQuery(function($) {
       delete user_points[inc].points;
 
       var objects = point.split(',');
-      for (var i = 0; i < objects.length; i++) {
-        var coord = objects[i].split(' ');
+      for (var g = 0; g < objects.length; g++) {
+        var coord = objects[g].split(' ');
         newCoords.push(new google.maps.LatLng(coord[0], coord[1]));
       }
 
@@ -403,7 +403,7 @@ jQuery(function($) {
     /**
      * convert coordinates WKT to pair lat, lon
      * @param pointString
-     * @returns {*}
+     * @returns {string}
      */
     function convertCoord(pointString) {
       var point = pointString.match(/^POLYGON\(\((.*?)\)\)$/);
@@ -411,8 +411,8 @@ jQuery(function($) {
     }
 
     /**
-     * add new polygo on map event on click
-     * @param newPoly
+     * add new polygon on map event on click
+     * @param {object} newPoly
      */
     function addNewPolys(newPoly) {
 

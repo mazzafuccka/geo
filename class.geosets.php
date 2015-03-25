@@ -82,21 +82,22 @@ class GeoSets extends DataBaseCustomData {
 		add_filter( 'page_template', array( 'geoSets', 'geo_cabinet_page_template' ) );
 
 		// register form  additional fields
-		add_action( 'register_form',  array( 'geoSets', 'geo_show_extra_register_fields' ) );
-		add_action( 'register_post',  array( 'geoSets', 'geo_check_extra_register_fields' ), 10, 3 );
-		add_action( 'user_register',  array( 'geoSets', 'geo_register_extra_fields'), 100 );
+		add_action( 'register_form', array( 'geoSets', 'geo_show_extra_register_fields' ) );
+		add_action( 'register_post', array( 'geoSets', 'geo_check_extra_register_fields' ), 10, 3 );
+		add_action( 'user_register', array( 'geoSets', 'geo_register_extra_fields' ), 100 );
 		add_filter( 'gettext', array( 'geoSets', 'change_email_reg_text' ), 20, 3 );
 
 		/* redirect users to front page after login */
 		function redirect_to_front_page() {
 			global $redirect_to;
-			if (!isset($_GET['redirect_to'])) {
-				$redirect_to = get_option('siteurl');
+			if ( ! isset( $_GET['redirect_to'] ) ) {
+				$redirect_to = get_option( 'siteurl' );
 			}
 		}
-		add_action('login_form', 'redirect_to_front_page');
 
-        load_plugin_textdomain( GeoSets::CONTENT, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		add_action( 'login_form', 'redirect_to_front_page' );
+
+		load_plugin_textdomain( GeoSets::CONTENT, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
 	/**
@@ -330,8 +331,8 @@ class GeoSets extends DataBaseCustomData {
 				'nonce'    => wp_create_nonce( 'token_action' ),
 				'user_id'  => get_current_user_id(),
 				'limit'    => get_option( 'limit' ),
-				'lang'     => explode('_', get_locale())[0],
-				'coord'    => self::get_user_last_point(get_current_user_id())
+				'lang'     => explode( '_', get_locale() )[0],
+				'coord'    => self::get_user_last_point( get_current_user_id() )
 			)
 		);
 
@@ -676,7 +677,8 @@ class GeoSets extends DataBaseCustomData {
 
 			if ( empty( $data ) ) {
 				$countColumns = count( $columns );
-				return '<tr><td class="colspanchange" colspan="' . $countColumns . '">' . __('Elements not found.', GeoSets::CONTENT).'</td></tr>';
+
+				return '<tr><td class="colspanchange" colspan="' . $countColumns . '">' . __( 'Elements not found.', GeoSets::CONTENT ) . '</td></tr>';
 			}
 
 			// mixin
@@ -762,6 +764,7 @@ class GeoSets extends DataBaseCustomData {
 
 	/**
 	 * Reg extra field in registration
+	 *
 	 * @param int $user_id update user date fields
 	 */
 	public static function geo_register_extra_fields( $user_id ) {
@@ -777,7 +780,8 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
-	 *
+	 * additional register field for registration form
+	 * password, repeat password, description
 	 */
 	public static function geo_show_extra_register_fields() {
 		?>
@@ -795,7 +799,8 @@ class GeoSets extends DataBaseCustomData {
 		</p>
 		<p>
 			<label for="description"><?php _e( 'Biographical Info', self::CONTENT ); ?><br/>
-				<textarea id="description" style="font-size:14px;" class="input" rows="10" name="description"></textarea>
+				<textarea id="description" style="font-size:14px;" class="input" rows="10"
+				          name="description"></textarea>
 			</label>
 		</p>
 	<?php
@@ -803,6 +808,7 @@ class GeoSets extends DataBaseCustomData {
 
 	/**
 	 * Check the form for errors
+	 *
 	 * @param $login
 	 * @param $email
 	 * @param $errors
@@ -831,22 +837,25 @@ class GeoSets extends DataBaseCustomData {
 				'm_fail_error' => __( 'Error save data on server. Try again leter.', self::CONTENT ),
 				'm_row_delete' => __( 'Row deleted!', self::CONTENT ),
 				'm_confirm'    => __( 'Your have delete?', self::CONTENT ),
-				'm_limit'      => __( 'Limit point on shape! Use less then ', self::CONTENT)
+				'm_limit'      => __( 'Limit point on shape! Use less then ', self::CONTENT )
 			)
 		);
 	}
 
 	/**
-	 * @param $id
+	 * Get last user saved shape
 	 *
-	 * @return array
+	 * @param int $id ID element in geo table
+	 *
+	 * @return string poligon WKT
 	 */
-	public static function get_user_last_point($id){
-		if($id){
-			$db = new GeoSets();
-			$result = $db->getLastShapeByUserId($id);
-			$result = !empty($result) && isset($result[0]) ? $result[0] : null;
-			return isset($result['points']) ? $result['points'] : '';
+	public static function get_user_last_point( $id ) {
+		if ( $id ) {
+			$db     = new GeoSets();
+			$result = $db->getLastShapeByUserId( $id );
+			$result = ! empty( $result ) && isset( $result[0] ) ? $result[0] : null;
+
+			return isset( $result['points'] ) ? $result['points'] : '';
 		} else {
 			return '';
 		}
