@@ -43,6 +43,21 @@ class GeoSets extends DataBaseCustomData {
 	const DB_USERS_POINTS = 'geosets_user_points';
 
 	/**
+	 * devices structure
+	 */
+	const DB_USERS_DEVICES = 'geosets_devices';
+
+	/**
+	 * user-device structure
+	 */
+	const DB_USERS_USER_DEVICES = 'geosets_user_device';
+
+	/**
+	 * user-device structure
+	 */
+	const DB_USERS_ROUTES = 'geosets_routes';
+
+	/**
 	 * date time format from frontend
 	 */
 	const DATETIME_FORMAT = 'd.m.Y H:i';
@@ -159,6 +174,58 @@ class GeoSets extends DataBaseCustomData {
 	) $charset_collate;";
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
+
+		// devices
+		$table_name_devices = $wpdb->prefix . GeoSets::DB_USERS_DEVICES;
+		$sql_devices = "CREATE TABLE IF NOT EXISTS $table_name_devices (
+		id int(11) NOT NULL AUTO_INCREMENT,
+		serial_number var_char(64) NOT NULL COMMENT 'serial number or device',
+		name tinytext NOT NULL COMMENT 'name devices',
+		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
+		password varchar(64) NOT NULL COMMENT 'password on device',
+		device_points geometry NOT NULL COMMENT 'device coordinates',
+		description text NOT NULL,
+		charge tinyint(3) DEFAULT 0 COMMENT 'charge percent device',
+		status tinyint(1) DEFAULT '0' COMMENT 'state active device',
+		UNIQUE KEY id (id),
+        INDEX (password),
+        INDEX (serial_number)
+        INDEX (status)
+		) $charset_collate;";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql_devices );
+
+		// user-device table
+		$table_name_user_devices = $wpdb->prefix . GeoSets::DB_USERS_USER_DEVICES;
+		$sql_user_device = "CREATE TABLE IF NOT EXISTS $table_name_user_devices (
+		user_id int(11) NOT NULL COMMENT 'user_id fk wp users table',
+		device_id int(11) NOT NULL COMMENT 'device_id fk DB_USERS_DEVICES',
+        INDEX (user_id),
+        INDEX (device_id)
+		) $charset_collate;";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql_user_device );
+
+		// routes
+		$table_routes = $wpdb->prefix . GeoSets::DB_USERS_ROUTES;
+		$sql_routes = "CREATE TABLE IF NOT EXISTS $table_routes (
+		id int(11) NOT NULL AUTO_INCREMENT,
+		name tinytext NOT NULL COMMENT 'name devices',
+		height int(6) COMMENT 'height of routes',
+		device_id int(11) NOT NULL COMMENT 'device_id for route',
+		user_id int(11) NOT NULL COMMENT 'user_id route',
+		routes_points geometry NOT NULL COMMENT 'routes coordinates',
+		create_time datetime DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT 'create route time',
+		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
+		status tinyint(1) DEFAULT '0' COMMENT 'status route, 0 - disabled, 1 - revision, 2- active',
+		UNIQUE KEY id (id),
+        INDEX (password),
+        INDEX (device_id),
+        INDEX (user_id),
+        INDEX (user_id, device_id, status)
+		) $charset_collate;";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql_routes );
 
 		add_option( 'jal_db_version', $jal_db_version );
 	}
