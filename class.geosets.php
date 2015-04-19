@@ -270,6 +270,30 @@ class GeoSets extends DataBaseCustomData {
 			),
 			'dashicons-admin-settings'
 		);
+		add_submenu_page(
+			__FILE__,
+			__( 'Devices', $content ),
+			__( 'Devices', $content ),
+			'publish_pages',
+			'geo_dispatcher_device_page',
+			array(
+				'GeoSets',
+				'geo_dispatcher_device_page'
+			),
+			'dashicons-admin-settings'
+		);
+		add_submenu_page(
+			__FILE__,
+			__( 'Tracks', $content ),
+			__( 'Tracks', $content ),
+			'publish_pages',
+			'geo_dispatcher_track_page',
+			array(
+				'GeoSets',
+				'geo_dispatcher_track_page'
+			),
+			'dashicons-admin-settings'
+		);
 	}
 
 	/**
@@ -923,6 +947,46 @@ class GeoSets extends DataBaseCustomData {
 		} else {
 			return '';
 		}
+
+	}
+
+	/**
+	 * view for cabinet dispatcher device page
+	 */
+	public static function geo_dispatcher_device_page() {
+		global $current_user;
+		get_currentuserinfo();
+		// table user points
+		$content = self::CONTENT;
+
+		// List table
+		if ( ! class_exists( 'GeoListTables' ) ) {
+			require_once( 'class.geolist-tables.php' );
+		}
+		$db = new GeoSets();
+		// current user data points from DB
+		$data = $db->getByUserId( $current_user->ID );
+
+		?>
+
+		<div class="wrapper">
+			<h2><?php _e( 'Your managment Devices', $content ) ?></h2>
+			<?php
+			$table = new GeoListTables();
+			$table->setData( $data );
+			$table->prepare_items();
+			$table->display();
+			?>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * view for cabinet dispatcher tracks page
+	 */
+	public function geo_dispatcher_track_page()
+	{
 
 	}
 
