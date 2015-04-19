@@ -172,6 +172,7 @@ class GeoSets extends DataBaseCustomData {
         INDEX (start_time, end_time),
         INDEX (user_id)
 	) $charset_collate;";
+
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
 
@@ -179,7 +180,7 @@ class GeoSets extends DataBaseCustomData {
 		$table_name_devices = $wpdb->prefix . GeoSets::DB_USERS_DEVICES;
 		$sql_devices = "CREATE TABLE IF NOT EXISTS $table_name_devices (
 		id int(11) NOT NULL AUTO_INCREMENT,
-		serial_number var_char(64) NOT NULL COMMENT 'serial number or device',
+		serial_number varchar(64) NOT NULL COMMENT 'serial number or device',
 		name tinytext NOT NULL COMMENT 'name devices',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
 		password varchar(64) NOT NULL COMMENT 'password on device',
@@ -189,10 +190,9 @@ class GeoSets extends DataBaseCustomData {
 		status tinyint(1) DEFAULT '0' COMMENT 'state active device',
 		UNIQUE KEY id (id),
         INDEX (password),
-        INDEX (serial_number)
+        INDEX (serial_number),
         INDEX (status)
 		) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql_devices );
 
 		// user-device table
@@ -203,7 +203,6 @@ class GeoSets extends DataBaseCustomData {
         INDEX (user_id),
         INDEX (device_id)
 		) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql_user_device );
 
 		// routes
@@ -215,16 +214,14 @@ class GeoSets extends DataBaseCustomData {
 		device_id int(11) NOT NULL COMMENT 'device_id for route',
 		user_id int(11) NOT NULL COMMENT 'user_id route',
 		routes_points geometry NOT NULL COMMENT 'routes coordinates',
-		create_time datetime DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT 'create route time',
+		create_time datetime DEFAULT NOW() NOT NULL COMMENT 'create route time',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
 		status tinyint(1) DEFAULT '0' COMMENT 'status route, 0 - disabled, 1 - revision, 2- active',
 		UNIQUE KEY id (id),
-        INDEX (password),
         INDEX (device_id),
         INDEX (user_id),
         INDEX (user_id, device_id, status)
 		) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql_routes );
 
 		add_option( 'jal_db_version', $jal_db_version );
