@@ -32,15 +32,15 @@ class GeoListDevicesTables extends WP_List_Table {
 	public function get_columns() {
 		$content = GeoSets::CONTENT;
 		$columns = array(
-			'id'          => __( '#', $content ),
-			'serial_number'        => __( 'Serial Number', $content ),
-			'name' => __( 'Name', $content ),
-			'modify_time'  => __( 'Edit time', $content ),
-			'password'    => __( 'Password', $content ),
-			'device_points'        => __( 'Device Coordinates', $content ),
-			'description'      => __( 'Description', $content ),
-			'charge' => __( 'Charged', $content ),
-			'status'      => __( 'Status', $content )
+			'id'            => __( '#', $content ),
+			'serial_number' => __( 'Serial Number', $content ),
+			'name'          => __( 'Name', $content ),
+			'modify_time'   => __( 'Edit time', $content ),
+			'password'      => __( 'Password', $content ),
+			'device_points' => __( 'Device Coordinates', $content ),
+			'description'   => __( 'Description', $content ),
+			'charge'        => __( 'Charged', $content ),
+			'status'        => __( 'Status', $content )
 		);
 
 		return $columns;
@@ -59,6 +59,7 @@ class GeoListDevicesTables extends WP_List_Table {
 
 	/**
 	 * types output columns
+	 *
 	 * @param $item
 	 * @param $column_name
 	 *
@@ -77,7 +78,8 @@ class GeoListDevicesTables extends WP_List_Table {
 			case 'charge':
 			case 'status':
 			case 'actions':
-				return '<a class="remove" href="#" data-id ="'.$item['id'].'" >x</a>';break;
+				return '<a class="remove" href="#" data-id ="' . $item['id'] . '" >x</a>';
+				break;
 			default:
 				return $item[ $column_name ];
 		}

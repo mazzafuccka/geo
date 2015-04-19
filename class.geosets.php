@@ -65,9 +65,14 @@ class GeoSets extends DataBaseCustomData {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct( $table = null ) {
 		global $wpdb;
-		parent::__construct( $wpdb->prefix . GeoSets::DB_USERS_POINTS );
+		if ( $table ) {
+			$tableName = $wpdb->prefix . $table;
+		} else {
+			$tableName = $wpdb->prefix . GeoSets::DB_USERS_POINTS;
+		}
+		parent::__construct( $tableName );
 	}
 
 	/**
@@ -178,7 +183,7 @@ class GeoSets extends DataBaseCustomData {
 
 		// devices
 		$table_name_devices = $wpdb->prefix . GeoSets::DB_USERS_DEVICES;
-		$sql_devices = "CREATE TABLE IF NOT EXISTS $table_name_devices (
+		$sql_devices        = "CREATE TABLE IF NOT EXISTS $table_name_devices (
 		id int(11) NOT NULL AUTO_INCREMENT,
 		serial_number varchar(64) NOT NULL COMMENT 'serial number or device',
 		name tinytext NOT NULL COMMENT 'name devices',
@@ -197,7 +202,7 @@ class GeoSets extends DataBaseCustomData {
 
 		// user-device table
 		$table_name_user_devices = $wpdb->prefix . GeoSets::DB_USERS_USER_DEVICES;
-		$sql_user_device = "CREATE TABLE IF NOT EXISTS $table_name_user_devices (
+		$sql_user_device         = "CREATE TABLE IF NOT EXISTS $table_name_user_devices (
 		user_id int(11) NOT NULL COMMENT 'user_id fk wp users table',
 		device_id int(11) NOT NULL COMMENT 'device_id fk DB_USERS_DEVICES',
         INDEX (user_id),
@@ -207,7 +212,7 @@ class GeoSets extends DataBaseCustomData {
 
 		// routes
 		$table_routes = $wpdb->prefix . GeoSets::DB_USERS_ROUTES;
-		$sql_routes = "CREATE TABLE IF NOT EXISTS $table_routes (
+		$sql_routes   = "CREATE TABLE IF NOT EXISTS $table_routes (
 		id int(11) NOT NULL AUTO_INCREMENT,
 		name tinytext NOT NULL COMMENT 'name devices',
 		height int(6) COMMENT 'height of routes',
@@ -239,7 +244,7 @@ class GeoSets extends DataBaseCustomData {
 		<div class="<?= $type; ?>">
 			<p><?php _e( $message, $domain ); ?></p>
 		</div>
-	<?php
+		<?php
 	}
 
 
@@ -336,7 +341,7 @@ class GeoSets extends DataBaseCustomData {
 			?>
 		</div>
 
-	<?php
+		<?php
 	}
 
 	/**
@@ -664,7 +669,7 @@ class GeoSets extends DataBaseCustomData {
 
 			</form>
 		</div>
-	<?php
+		<?php
 	}
 
 	/**
@@ -813,7 +818,7 @@ class GeoSets extends DataBaseCustomData {
 				<tbody><?php echo bodyHtml( $columns, $data ); ?></tbody>
 			</table>
 		</div>
-	<?php
+		<?php
 	}
 
 	/**
@@ -891,7 +896,7 @@ class GeoSets extends DataBaseCustomData {
 				          name="description"></textarea>
 			</label>
 		</p>
-	<?php
+		<?php
 	}
 
 	/**
@@ -960,10 +965,10 @@ class GeoSets extends DataBaseCustomData {
 		$content = self::CONTENT;
 
 		// List table
-		if ( ! class_exists( 'GeoListTables' ) ) {
-			require_once( 'class.geolist-tables.php' );
+		if ( ! class_exists( 'GeoListDevicesTables' ) ) {
+			require_once( 'class.geolist-devices-tables.php' );
 		}
-		$db = new GeoSets();
+		$db = new GeoSets(GeoSets::DB_USERS_DEVICES);
 		// current user data points from DB
 		$data = $db->getByUserId( $current_user->ID );
 
@@ -985,9 +990,8 @@ class GeoSets extends DataBaseCustomData {
 	/**
 	 * view for cabinet dispatcher tracks page
 	 */
-	public function geo_dispatcher_track_page()
-	{
-
+	public function geo_dispatcher_track_page() {
+		return "It's OK!";
 	}
 
 }
