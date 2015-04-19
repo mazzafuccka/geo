@@ -207,6 +207,27 @@ abstract class DataBaseCustomData {
 	}
 
 	/**
+	 * Search rows by user
+	 *
+	 * @param $user_id
+	 *
+	 * @return array
+	 */
+	public function getDevicesByUserId( $user_id ) {
+		global $wpdb;
+
+		if ( ! empty( $user_id ) ) {
+			$devices = $this->getDeviceIdByUserId($user_id);
+			$sql = $wpdb->prepare( 'SELECT *
+ 			FROM ' . $this->tableName . ' WHERE device_id IN (%d) ', $devices );
+
+			return $wpdb->get_results( $sql, ARRAY_A );
+		}
+
+		return array();
+	}
+
+	/**
 	 *
 	 * @param $value
 	 *
@@ -252,5 +273,30 @@ abstract class DataBaseCustomData {
 		}
 
 		return array();
+	}
+
+	/**
+	 * @param $user_id
+	 *
+	 * @return mixed
+	 */
+	public function getDeviceIdByUserId($user_id){
+		global $wpdb;
+		$sql = $wpdb->prepare( 'SELECT
+				device_id
+ 			FROM ' . self::getDBName(GeoSets::DB_USERS_USER_DEVICES) . ' WHERE user_id = %d', $user_id );
+
+		return $wpdb->get_results( $sql, ARRAY_A );
+
+	}
+
+	/**
+	 * @param $name
+	 *
+	 * @return string
+	 */
+	private function getDBName($name){
+		global $wpdb;
+		return $wpdb->prefix . $name;
 	}
 }

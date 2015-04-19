@@ -970,14 +970,14 @@ class GeoSets extends DataBaseCustomData {
 		}
 		$db = new GeoSets(GeoSets::DB_USERS_DEVICES);
 		// current user data from DB
-		$data = $db->getByUserId( $current_user->ID );
+		$data = $db->getDevicesByUserId( $current_user->ID );
 
 		?>
 
 		<div class="wrapper">
 			<h2><?php _e( 'Your managment Devices', $content ) ?></h2>
 			<?php
-			$table = new GeoListTables();
+			$table = new GeoListDevicesTables();
 			$table->setData( $data );
 			$table->prepare_items();
 			$table->display();
@@ -990,8 +990,8 @@ class GeoSets extends DataBaseCustomData {
 	/**
 	 * view for cabinet dispatcher tracks page
 	 */
-	public function geo_dispatcher_track_page() {
-		return "It's OK!";
+	public static function geo_dispatcher_track_page() {
+		echo "It's OK!";
 	}
 
 }
