@@ -152,13 +152,13 @@ abstract class DataBaseCustomData {
 	}
 
 	/**
-	 * Search rows by user
+	 * Search rows by user points
 	 *
 	 * @param $user_id
 	 *
 	 * @return array
 	 */
-	public function getByUserId( $user_id, $extired = false ) {
+	public function getByUserIdPoints( $user_id, $extired = false ) {
 		global $wpdb;
 
 		$addWhere = '';
@@ -179,6 +179,26 @@ abstract class DataBaseCustomData {
 				type,
 				status
  			FROM ' . $this->tableName . ' WHERE user_id = %d ' . $addWhere, $user_id );
+
+			return $wpdb->get_results( $sql, ARRAY_A );
+		}
+
+		return array();
+	}
+
+	/**
+	 * Search rows by user
+	 *
+	 * @param $user_id
+	 *
+	 * @return array
+	 */
+	public function getByUserId( $user_id ) {
+		global $wpdb;
+
+		if ( ! empty( $user_id ) ) {
+			$sql = $wpdb->prepare( 'SELECT *
+ 			FROM ' . $this->tableName . ' WHERE user_id = %d ', $user_id );
 
 			return $wpdb->get_results( $sql, ARRAY_A );
 		}

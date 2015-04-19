@@ -308,7 +308,7 @@ class GeoSets extends DataBaseCustomData {
 		global $current_user;
 		$db = new GeoSets();
 		// current user data points from DB
-		$data = $db->getByUserId( $current_user->ID, true );
+		$data = $db->getByUserIdPoints( $current_user->ID, true );
 		echo '<script> var user_points =' . json_encode( $data ) . '</script>';
 	}
 
@@ -327,7 +327,7 @@ class GeoSets extends DataBaseCustomData {
 		}
 		$db = new GeoSets();
 		// current user data points from DB
-		$data = $db->getByUserId( $current_user->ID );
+		$data = $db->getByUserIdPoints( $current_user->ID );
 
 		?>
 
@@ -738,7 +738,7 @@ class GeoSets extends DataBaseCustomData {
 
 		$db = new GeoSets();
 		// current user data points from DB
-		$data    = $db->getByUserId( $current_user->ID );
+		$data    = $db->getByUserIdPoints( $current_user->ID );
 		$content = GeoSets::CONTENT;
 		$columns = array(
 			'id'          => __( '#', $content ),
@@ -969,7 +969,7 @@ class GeoSets extends DataBaseCustomData {
 			require_once( 'class.geolist-devices-tables.php' );
 		}
 		$db = new GeoSets(GeoSets::DB_USERS_DEVICES);
-		// current user data points from DB
+		// current user data from DB
 		$data = $db->getByUserId( $current_user->ID );
 
 		?>
