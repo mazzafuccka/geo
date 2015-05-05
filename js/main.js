@@ -66,6 +66,7 @@ jQuery(function($) {
     var emptyTime = '0000-00-00 00:00:00';
     var action = obj.find('input[name="action"]');
     var unlim = obj.find('input[name="unlim"]');
+    var statusBlock = obj.find('div.status');
     obj.find('input[name="points"]').val(points);
     obj.find('input[name="id"]').val('');
     obj.find('input,textarea').each(function() {
@@ -91,6 +92,15 @@ jQuery(function($) {
       }
 
     });
+
+    // sets status
+    if (info.status) {
+      statusBlock.show();
+      $('[data-name="status"]').text(info.status);
+    } else {
+      statusBlock.hide();
+    }
+
 
     var block = $('.dateTimeWrapper-js');
     if (typeof info === 'undefined' ||
@@ -387,10 +397,19 @@ jQuery(function($) {
         return "#" + c() + c() + c();
       }
 
+      function getObjectColor(info){
+        console.log(info);
+        switch(info.status){
+          case 'Active' : return getRandomColor(); break;
+          case 'Treatment' : return '#555'; break;
+          default : return '#000'; break;
+        }
+      }
+
       newPolygons[inc] = new google.maps.Polygon({
         path: newCoords,
         strokeWeight: 0,
-        //fillColor: getRandomColor(),
+        fillColor: getObjectColor(infoData[inc]),
         fillOpacity: 0.45
       });
 
@@ -619,7 +638,7 @@ jQuery(function($) {
   //delete element from table
   $('.wp-list-table').find('a.remove').click(function(e) {
     e.preventDefault();
-    var cMessage = typeof translate !== 'undefined' ? translate : 'Your have delete?';
+    var cMessage = typeof translate !== 'undefined' ? translate.m_confirm : 'Your have delete?';
     if (confirm(cMessage)) {
       var id = $(this).attr('data-id');
       var data = {
@@ -634,6 +653,10 @@ jQuery(function($) {
           var tMessage = typeof translate !== 'undefined' ? translate.m_row_delete : 'Row deleted!';
           alert(tMessage);
           location.reload()
+        }
+        else if (response.state == 'error' && response.error.length > 0) {
+          var tnMessage = typeof translate !== 'undefined' ? translate.m_row_not_delete : 'Row not deleted!';
+          alert(tnMessage);
         }
       }).error(function() {
         alert(failMessage);

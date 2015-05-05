@@ -164,7 +164,7 @@ abstract class DataBaseCustomData {
 		$addWhere = '';
 
 		if ( $extired == true ) {
-			$addWhere = ' and (end_time > NOW() or end_time is NULL) and status = 1';
+			$addWhere = ' and (end_time > NOW() or end_time is NULL) and status IN (1, 2)';
 		}
 		if ( ! empty( $user_id ) ) {
 			$sql = $wpdb->prepare( 'SELECT
@@ -253,7 +253,7 @@ abstract class DataBaseCustomData {
 	public function getLastShapeByUserId( $user_id ) {
 		global $wpdb;
 
-		$addWhere = ' and (end_time > NOW() or end_time is NULL) and status = 1';
+		$addWhere = ' and (end_time > NOW() or end_time is NULL) and status IN (1, 2)';
 
 		if ( ! empty( $user_id ) ) {
 			$sql = $wpdb->prepare( 'SELECT

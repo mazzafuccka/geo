@@ -172,7 +172,7 @@ class GeoSets extends DataBaseCustomData {
 		type varchar(64) NOT NULL COMMENT 'type of poligon',
 		points geometry NOT NULL COMMENT 'geo point of objects, poligons',
 		description text NOT NULL,
-		status tinyint(1) DEFAULT '0' COMMENT 'state, view or not views on map, active state',
+		status tinyint(1) DEFAULT '2' COMMENT 'status objects, 0 - disabled, 1 - active, 2 - moderate',
 		UNIQUE KEY id (id),
         INDEX (start_time, end_time),
         INDEX (user_id)
@@ -221,7 +221,7 @@ class GeoSets extends DataBaseCustomData {
 		routes_points geometry NOT NULL COMMENT 'routes coordinates',
 		create_time datetime DEFAULT NOW() NOT NULL COMMENT 'create route time',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
-		status tinyint(1) DEFAULT '0' COMMENT 'status route, 0 - disabled, 1 - revision, 2- active',
+		status tinyint(1) DEFAULT '2' COMMENT 'status route, 0 - disabled, 1 - revision, 2 - active',
 		UNIQUE KEY id (id),
         INDEX (device_id),
         INDEX (user_id),
@@ -308,7 +308,7 @@ class GeoSets extends DataBaseCustomData {
 		global $current_user;
 		$db = new GeoSets();
 		// current user data points from DB
-		$data = $db->getByUserIdPoints( $current_user->ID, true );
+		$data = $db->_prepare_select( $db->getByUserIdPoints( $current_user->ID, true ) );
 		echo '<script> var user_points =' . json_encode( $data ) . '</script>';
 	}
 
@@ -368,6 +368,10 @@ class GeoSets extends DataBaseCustomData {
             <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>
             <!-- block edited information -->
             <form id='object_form' method='post' enctype='multipart/form-data'>
+                <div class='status' style='display:none;'>
+	                <label for='name'>" . __( 'Status', GeoSets::CONTENT ) . ":</label>
+	                <span data-name='status'></span><br/>
+                </div>
                 <label for='name'>" . __( 'Name', GeoSets::CONTENT ) . "</label>
                 <input type='text' value='' name='name' required/>
 
@@ -556,7 +560,8 @@ class GeoSets extends DataBaseCustomData {
 				} elseif ( $input['type_object'] == 'polygon' && $name == 'points' ) {
 					//poligon convert data
 					$result[ $name ] = self::convertPointsTo( $value, $input['type_object'] );
-
+				} elseif ( $name == 'status' ) {
+					$result[ $name ] = $value;
 				} else {
 					$result[ $name ] = $value;
 				}
@@ -565,11 +570,41 @@ class GeoSets extends DataBaseCustomData {
 
 		// add modify time
 		$result['modify_time'] = date( "Y-m-d H:i:s" );
-		$result['status']      = 1;
+		// set default to 2 - moderation
+		if ( empty( $result['status'] ) ) {
+			$result['status'] = 2;
+		}
+
 		// add user_id
 		$result['user_id'] = isset( $result['user_id'] ) && $user->ID == (int) $result['user_id'] ? (int) $result['user_id'] : $user->ID;
 
 		return $result;
+	}
+
+	/**
+	 * Prepare select data for objects
+	 *
+	 * @param array $data
+	 *
+	 * @return array $data modify array data
+	 */
+	private function _prepare_select( $data ) {
+		if ( ! empty( $data ) ) {
+			foreach ( $data as &$row ) {
+				if ( is_array( $row ) ) {
+					foreach ( $row as $key => &$element ) {
+						switch ( $key ) {
+							case 'status' :
+								$element = GeoSets::getStatusName( $element );
+								break;
+						}
+					}
+				}
+
+			}
+		}
+
+		return $data;
 	}
 
 	/**
@@ -717,6 +752,29 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
+	 * Get Status Text Name
+	 *
+	 * @param $status
+	 *
+	 * @return string|void
+	 */
+	public static function getStatusName( $status ) {
+		$content = GeoSets::CONTENT;
+
+		switch ( $status ) {
+			case '0' :
+				return __( 'Disabled', $content );
+				break;
+			case '1' :
+				return __( 'Active', $content );
+				break;
+			case '2' :
+				return __( 'Treatment', $content );
+				break;
+		}
+	}
+
+	/**
 	 * @param $page_template
 	 *
 	 * @return string
@@ -781,6 +839,7 @@ class GeoSets extends DataBaseCustomData {
 				$row['start_time']  = GeoSets::convertMysqlDateTime( $row['start_time'] );
 				$row['end_time']    = GeoSets::convertMysqlDateTime( $row['end_time'] );
 				$row['modify_time'] = GeoSets::convertMysqlDateTime( $row['modify_time'] );
+				$row['status']      = GeoSets::getStatusName( $row['status'] );
 
 				return $row;
 			}, $data );
@@ -924,13 +983,14 @@ class GeoSets extends DataBaseCustomData {
 		// add info
 		wp_localize_script( 'geo', 'translate',
 			array(
-				'm_save'       => __( 'Saved.', self::CONTENT ),
-				'm_deleted'    => __( 'Deleted.', self::CONTENT ),
-				'm_error'      => __( 'Server Error.', self::CONTENT ),
-				'm_fail_error' => __( 'Error save data on server. Try again leter.', self::CONTENT ),
-				'm_row_delete' => __( 'Row deleted!', self::CONTENT ),
-				'm_confirm'    => __( 'Your have delete?', self::CONTENT ),
-				'm_limit'      => __( 'Limit point on shape! Use less then ', self::CONTENT )
+				'm_save'           => __( 'Saved.', self::CONTENT ),
+				'm_deleted'        => __( 'Deleted.', self::CONTENT ),
+				'm_error'          => __( 'Server Error.', self::CONTENT ),
+				'm_fail_error'     => __( 'Error save data on server. Try again leter.', self::CONTENT ),
+				'm_row_delete'     => __( 'Row deleted!', self::CONTENT ),
+				'm_row_not_delete' => __( 'Row not deleted!', self::CONTENT ),
+				'm_confirm'        => __( 'Your have delete?', self::CONTENT ),
+				'm_limit'          => __( 'Limit point on shape! Use less then ', self::CONTENT )
 			)
 		);
 	}
@@ -968,7 +1028,7 @@ class GeoSets extends DataBaseCustomData {
 		if ( ! class_exists( 'GeoListDevicesTables' ) ) {
 			require_once( 'class.geolist-devices-tables.php' );
 		}
-		$db = new GeoSets(GeoSets::DB_USERS_DEVICES);
+		$db = new GeoSets( GeoSets::DB_USERS_DEVICES );
 		// current user data from DB
 		$data = $db->getDevicesByUserId( $current_user->ID );
 
