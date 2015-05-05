@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geoSets\n"
-"POT-Creation-Date: 2015-03-24 19:16+0500\n"
-"PO-Revision-Date: 2015-03-24 19:16+0500\n"
+"POT-Creation-Date: 2015-05-05 08:39+0500\n"
+"PO-Revision-Date: 2015-05-05 08:41+0500\n"
 "Last-Translator: \n"
 "Language-Team: drdim <dr.dim.pro@gmail.com>\n"
 "Language: ru_RU\n"
@@ -37,110 +37,136 @@ msgstr "Информация пользователя"
 msgid "Cancel"
 msgstr "Отмена"
 
-#: ../class.geolist-tables.php:35 ../class.geosets.php:649
+#: ../class.geolist-devices-tables.php:35 ../class.geolist-tables.php:35
+#: ../class.geosets.php:802
 msgid "#"
 msgstr "#"
 
-#: ../class.geolist-tables.php:36 ../class.geosets.php:277
-#: ../class.geosets.php:650
+#: ../class.geolist-devices-tables.php:36
+msgid "Serial Number"
+msgstr "Серийный номер"
+
+#: ../class.geolist-devices-tables.php:37 ../class.geolist-tables.php:36
+#: ../class.geosets.php:375 ../class.geosets.php:803
 msgid "Name"
 msgstr "Имя"
 
-#: ../class.geolist-tables.php:37 ../class.geosets.php:293
-#: ../class.geosets.php:651
-msgid "Description"
-msgstr "Описание"
-
-#: ../class.geolist-tables.php:38 ../class.geosets.php:284
-#: ../class.geosets.php:652
-msgid "Start time"
-msgstr "Начало"
-
-#: ../class.geolist-tables.php:39 ../class.geosets.php:287
-#: ../class.geosets.php:653
-msgid "End time"
-msgstr "Конец"
-
-#: ../class.geolist-tables.php:40 ../class.geosets.php:654
-msgid "Type"
-msgstr "Тип"
-
-#: ../class.geolist-tables.php:41 ../class.geosets.php:655
-msgid "Coordinates"
-msgstr "Координаты"
-
-#: ../class.geolist-tables.php:42
+#: ../class.geolist-devices-tables.php:38 ../class.geolist-tables.php:42
 msgid "Edit time"
 msgstr "Время изменения"
 
-#: ../class.geolist-tables.php:43 ../class.geosets.php:657
+#: ../class.geolist-devices-tables.php:39 ../class.geosets.php:941
+msgid "Password"
+msgstr "Пароль"
+
+#: ../class.geolist-devices-tables.php:40
+msgid "Device Coordinates"
+msgstr "Координаты"
+
+#: ../class.geolist-devices-tables.php:41 ../class.geolist-tables.php:37
+#: ../class.geosets.php:391 ../class.geosets.php:804
+msgid "Description"
+msgstr "Описание"
+
+#: ../class.geolist-devices-tables.php:42
+msgid "Charged"
+msgstr "Заряд"
+
+#: ../class.geolist-devices-tables.php:43 ../class.geolist-tables.php:43
+#: ../class.geosets.php:372 ../class.geosets.php:810
 msgid "Status"
 msgstr "Статус"
 
-#: ../class.geolist-tables.php:44 ../class.geosets.php:658
+#: ../class.geolist-tables.php:38 ../class.geosets.php:382
+#: ../class.geosets.php:805
+msgid "Start time"
+msgstr "Начало"
+
+#: ../class.geolist-tables.php:39 ../class.geosets.php:385
+#: ../class.geosets.php:806
+msgid "End time"
+msgstr "Конец"
+
+#: ../class.geolist-tables.php:40 ../class.geosets.php:807
+msgid "Type"
+msgstr "Тип"
+
+#: ../class.geolist-tables.php:41 ../class.geosets.php:808
+msgid "Coordinates"
+msgstr "Координаты"
+
+#: ../class.geolist-tables.php:44 ../class.geosets.php:811
 msgid "Action"
 msgstr "Действия"
 
-#: ../class.geosets.php:187 ../class.geosets.php:188
+#: ../class.geosets.php:257 ../class.geosets.php:258
 msgid "List Points"
 msgstr "Гео Объекты"
 
-#: ../class.geosets.php:198 ../class.geosets.php:199
+#: ../class.geosets.php:268 ../class.geosets.php:269
 msgid "Settings"
 msgstr "Настройки"
 
-#: ../class.geosets.php:241 ../class.geosets.php:718
+#: ../class.geosets.php:280 ../class.geosets.php:281
+msgid "Devices"
+msgstr "Устройства"
+
+#: ../class.geosets.php:292 ../class.geosets.php:293
+msgid "Tracks"
+msgstr "Маршруты"
+
+#: ../class.geosets.php:335 ../class.geosets.php:873
 msgid "Your points"
 msgstr "Ваши области"
 
-#: ../class.geosets.php:266
+#: ../class.geosets.php:360
 msgid "Cabinet"
 msgstr "Личный кабинет"
 
-#: ../class.geosets.php:267
+#: ../class.geosets.php:361
 msgid "Logout"
 msgstr "Выйти"
 
-#: ../class.geosets.php:274
+#: ../class.geosets.php:368
 msgid "Edit Object"
 msgstr "Изменение объекта"
 
-#: ../class.geosets.php:281
+#: ../class.geosets.php:379
 msgid "Unlimited time"
 msgstr "Неограниченное время"
 
-#: ../class.geosets.php:291
+#: ../class.geosets.php:389
 msgid "Type object"
 msgstr "Тип"
 
-#: ../class.geosets.php:305
+#: ../class.geosets.php:403
 msgid "Save"
 msgstr "Сохранить"
 
-#: ../class.geosets.php:306
+#: ../class.geosets.php:404
 msgid "Delete"
 msgstr "Удалить"
 
-#: ../class.geosets.php:544
+#: ../class.geosets.php:674
 msgid "Geo settings"
 msgstr "Настройки геообъекта"
 
-#: ../class.geosets.php:550
+#: ../class.geosets.php:680
 msgid "Geo object limit"
 msgstr "Лимит точек у объекта"
 
-#: ../class.geosets.php:554
+#: ../class.geosets.php:684
 msgid "Limit user sets on one page on one object"
 msgstr ""
 "Устанавливает лимит количества точек у одного полигона в объекте, если "
 "больше, выдается сообщение об ошибке создания такого объекта с указанным "
 "лимитом"
 
-#: ../class.geosets.php:560
+#: ../class.geosets.php:690
 msgid "Options types"
 msgstr "Список типов"
 
-#: ../class.geosets.php:565
+#: ../class.geosets.php:695
 msgid ""
 "Set options type for select dropdown, user \"code value\" [space] "
 "\"description\" on one row.<br/>View example:<br/> 15 Type1<br/> 20 Type2"
@@ -149,19 +175,31 @@ msgstr ""
 "формате \"Индификатор\" [пробел] \"Описание поле\"  по одной записи на "
 "строку.<br/>Пример:<br/> 1 Красный<br/> 2 Зеленый"
 
-#: ../class.geosets.php:572
+#: ../class.geosets.php:702
 msgid "Save Changes"
 msgstr "Сохранить изменения"
 
-#: ../class.geosets.php:656
+#: ../class.geosets.php:766
+msgid "Disabled"
+msgstr "Не активный"
+
+#: ../class.geosets.php:769
+msgid "Active"
+msgstr "Активный"
+
+#: ../class.geosets.php:772
+msgid "Treatment"
+msgstr "В обработке"
+
+#: ../class.geosets.php:809
 msgid "Modify time"
 msgstr "Последнее изменение"
 
-#: ../class.geosets.php:678
+#: ../class.geosets.php:832
 msgid "Elements not found."
 msgstr "Ничего не найдено."
 
-#: ../class.geosets.php:756
+#: ../class.geosets.php:911
 msgid ""
 "If you leave password fields empty one will be generated for you. Password "
 "must be at least eight characters long."
@@ -169,51 +207,55 @@ msgstr ""
 "Если вы оставите поля пароля пустым - будет сгенерирован для Вас. Пароль "
 "должен быть длиной не менее 8 символов."
 
-#: ../class.geosets.php:784
-msgid "Password"
-msgstr "Пароль"
-
-#: ../class.geosets.php:790
+#: ../class.geosets.php:947
 msgid "Repeat New Password"
 msgstr "Повторите ввод пароля"
 
-#: ../class.geosets.php:796
+#: ../class.geosets.php:953
 msgid "Biographical Info"
 msgstr "Обо мне"
 
-#: ../class.geosets.php:811
+#: ../class.geosets.php:970
 msgid "<strong>ERROR</strong>: Passwords must match"
 msgstr "<strong>Ошибка</strong>: Пароли должны совпадать"
 
-#: ../class.geosets.php:815
+#: ../class.geosets.php:974
 msgid ""
 "<strong>ERROR</strong>: Passwords must be at least eight characters long"
 msgstr "<strong>Ошибка</strong>: Длина пароля должна быть не менее 8 символов"
 
-#: ../class.geosets.php:827
+#: ../class.geosets.php:986
 msgid "Saved."
 msgstr "Сохранено."
 
-#: ../class.geosets.php:828
+#: ../class.geosets.php:987
 msgid "Deleted."
 msgstr "Удалено."
 
-#: ../class.geosets.php:829
+#: ../class.geosets.php:988
 msgid "Server Error."
 msgstr "Ошибка сервера."
 
-#: ../class.geosets.php:830
+#: ../class.geosets.php:989
 msgid "Error save data on server. Try again leter."
 msgstr "Ошибка сохранения данных на сервере. Повторите попытку позже."
 
-#: ../class.geosets.php:831
+#: ../class.geosets.php:990
 msgid "Row deleted!"
 msgstr "Строка удалена!"
 
-#: ../class.geosets.php:832
+#: ../class.geosets.php:991
+msgid "Row not deleted!"
+msgstr "Строка не удалена!"
+
+#: ../class.geosets.php:992
 msgid "Your have delete?"
 msgstr "Вы действительно хотите удалить?"
 
-#: ../class.geosets.php:833
+#: ../class.geosets.php:993
 msgid "Limit point on shape! Use less then "
 msgstr "Превышен лимит точек на  объект. Используйте менее чем "
+
+#: ../class.geosets.php:1038
+msgid "Your managment Devices"
+msgstr "Ваши устройства"
