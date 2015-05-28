@@ -187,30 +187,29 @@ class GeoSets extends DataBaseCustomData {
 		// devices
 		$table_name_devices = $wpdb->prefix . GeoSets::DB_USERS_DEVICES;
 		$sql_devices        = "CREATE TABLE IF NOT EXISTS $table_name_devices (
-		id int(11) NOT NULL AUTO_INCREMENT,
-		serial_number varchar(64) NOT NULL COMMENT 'serial number or device',
-		name tinytext NOT NULL COMMENT 'name devices',
-		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
-		password varchar(64) NOT NULL COMMENT 'password on device',
-		device_points geometry NOT NULL COMMENT 'device coordinates',
-		description text NOT NULL,
-		charge tinyint(3) DEFAULT 0 COMMENT 'charge percent device',
-		status tinyint(1) DEFAULT '0' COMMENT 'state active device',
-		UNIQUE KEY id (id),
-        INDEX (password),
-        INDEX (serial_number),
-        INDEX (status)
-		) $charset_collate;";
+			id int(12) not null auto_increment,
+			name char(80),
+			serial_number char(80),
+ 			modify_time datetime,
+ 			password char(40),
+			lat decimal(8, 5),
+			lng decimal(8, 5),
+			alt decimal(6,1),
+			description text,
+			status int( 8 ),
+			charge int( 8 ),
+                        PRIMARY KEY (id)
+			) $charset_collate;";
 		dbDelta( $sql_devices );
 
 		// user-device table
 		$table_name_user_devices = $wpdb->prefix . GeoSets::DB_USERS_USER_DEVICES;
 		$sql_user_device         = "CREATE TABLE IF NOT EXISTS $table_name_user_devices (
-		user_id int(11) NOT NULL COMMENT 'user_id fk wp users table',
-		device_id int(11) NOT NULL COMMENT 'device_id fk DB_USERS_DEVICES',
-        INDEX (user_id),
-        INDEX (device_id)
-		) $charset_collate;";
+			id int(12) not null auto_increment,
+			user_id int(14),
+			device_id int(14),
+			PRIMIARY KEY (id)
+			) $charset_collate;";
 		dbDelta( $sql_user_device );
 
 		// routes
@@ -355,8 +354,44 @@ class GeoSets extends DataBaseCustomData {
 	 * add html wrapper code
 	 */
 	public static function geo_main_page_view_hook() {
+
 		global $current_user;
-		$html = "
+		global $wpdb;
+
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
+	
+		$poly_arr="";
+
+		$res = mysql_query("select AsText(points) from ".$wpdb->prefix.GeoSets::DB_USERS_POINTS);
+
+		for ($i=0; $i<mysql_num_rows($res); $i++)
+		{
+			$poly = mysql_result($res, $i, 0);
+
+			$sk = str_replace('POLYGON((', '', $poly);
+			$coords = explode(',', str_replace(')', '', $sk));
+			
+			$poly_obj = "[";
+
+			foreach ($coords as $coord)
+			{
+				$arr = explode(' ',$coord);
+				$poly_obj .= "   new google.maps.LatLng(".$arr[0].", ".$arr[1]."),\n";
+			}
+			
+			$poly_obj .= "],\n";
+			
+			$poly_arr .= $poly_obj;			
+		} 
+
+		mysql_close($lnk);
+
+		$html = "\n\n
+		<script src=\"wp-content/themes/geotheme-master/js/pathfinding.js\"></script>
+	<script tyle='text/javascript' > var allPolygons = [ $poly_arr ];  </script>
+
 		<!--content-->
         <div id='map'>" . home_url() . "</div>
         <div class='cabinet '>
@@ -888,22 +923,23 @@ class GeoSets extends DataBaseCustomData {
 	private static function init_devices_table()
 	{
 		global $wpdb;
-
+		print "[+] init_devices_table() called<br>\n";
 		
 		$wpdb->query(
-			$wpdb->prepare("create table ".$wpdb->prefix.DB_USERS_DEVICES." if not exists (
-			id int(12) not null primary key auto_increment,
+			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES.
+			" (id int(12) not null auto_increment,
 			name char(80),
 			serial_number char(80),
  			modify_time datetime,
  			password char(40),
 			lat decimal(8, 5),
 			lng decimal(8, 5),
-			alt decimal(6,1)
+			alt decimal(6,1),
 			description text,
 			status int( 8 ),
-			charge int( 8 )
-			)")
+			charge int( 8 ),
+                        PRIMARY KEY (id)
+			);")
 		);
 
 
@@ -914,14 +950,15 @@ class GeoSets extends DataBaseCustomData {
 	private static function init_user_devices_table()
 	{
 		global $wpdb;
-
+		print "[+] init_user_devices_table() called<br>\n";
 		
 		$wpdb->query(
-			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." if not exists (
-			id int(12) not null primary key auto_increment,
+			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." (
+			id int(12) not null auto_increment,
 			user_id int(14),
-			device_id int(14)
-			)")
+			device_id int(14),
+			PRIMIARY KEY (id)
+			);")
 		);
 
 
@@ -952,25 +989,39 @@ class GeoSets extends DataBaseCustomData {
 		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
 		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
 		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
-		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></tfoot>\n\n";
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></tfoot><tbody>\n\n";
 
 		// проверяем существование таблицы, если нету - создаем
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
-			$this->init_devices_table();	
+		{
+			print "[+] no table finded, create new one...<br>\n";
+			GeoSets::init_devices_table();	
+		}
 
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES."' ") != 
 			$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES)
 			$this->init_user_devices_table();	
-
+/*
 		$lines = $wpdb->get_results("select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ". 
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 			" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or $wpdb ->print_error();		
+*/
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
 
-		foreach ($lines as $dev)
+		$res = mysql_query("select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
+//			$wpdb->prefix. GeoSets::DB_USERS_DEVICES." where 1"); 
+			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
+				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID);
+
+		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{
-			print "<tr><td>".$dev['id']."</td><td>".$dev['name']."</td><td>".$dev['description']."</td><td>$dev_points</td>";
-			print "<td>".$dev['lat'].", ".$dev['lng']." (alt ".$dev['alt']." meters)</td><td>".$dev['charge']."</td>";
-			print "<td>".$dev['serial_number']."</td><td>".$dev['modify_time']."</td><td>".$dev['status']."</td></tr>\n\n";
+			print "<tr><td>".mysql_result($res, $i, 'id')."</td><td>".mysql_result($res, $i, 'name')."</td><td>";
+			print mysql_result($res, $i, 'description')."</td><td>".mysql_result($res, $i, 'lat').", ";
+			print mysql_result($res, $i,'lng')." (alt ".mysql_result($res, $i,'alt')." meters)</td><td>".mysql_result($res, $i,'charge')."</td>";
+			print "<td>".mysql_result($res, $i,'serial_number')."</td><td>".mysql_result($res, $i,'modify_time').
+				"</td><td>".mysql_result($res, $i,'status')."</td></tr>\n\n";
 		}
 		
 		print "</tbody></table><br><hr>\n";
@@ -1117,9 +1168,24 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_dispatcher_device_page() {
 		global $current_user;
+		global $wpdb;
+
+		if (isset($_POST['serial']))
+		{
+			$nam = mysql_escape_string($_POST['nam']);
+			$serial = mysql_escape_string($_POST['serial']);
+			$pass = mysql_escape_string($_POST['pass']);
+			$dscr = mysql_escape_string($_POST['descr']);
+
+			if ($nam != '' && $serial != '' && $pass !='')
+				$wpdb->query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES.
+			" values (NULL, '$nam', '$serial', NOW(), '$pass', 0.0, 0.0, 0.0, '$dscr', 0, 100)") or $wpdb->print_error();
+			print "[+] added device.<br>\n";
+		}	
+
 		get_currentuserinfo();
 		// table user points
-		$content = self::CONTENT;
+		/* $content = self::CONTENT;
 
 		// List table
 		if ( ! class_exists( 'GeoListDevicesTables' ) ) {
@@ -1127,7 +1193,8 @@ class GeoSets extends DataBaseCustomData {
 		}
 		$db = new GeoSets( GeoSets::DB_USERS_DEVICES );
 		// current user data from DB
-		$data = $db->getDevicesByUserId( $current_user->ID );
+		// $data = $db->getDevicesByUserId( $current_user->ID );
+			*/
 
 		?>
 
@@ -1144,22 +1211,85 @@ class GeoSets extends DataBaseCustomData {
 		});
 			
 		</script>	
-		<div id='add_dev_form'>
+		<div id='add_dev_form'><form method=POST>
 			<table>
 			<tr><td>Name:</td><td><input type=text name=nam></td></tr>
 			<tr><td>Serial:</td><td><input type=text name=serial></td></tr>
 			<tr><td>Password:</td><td><input type=text name=pass></td></tr>
                         <tr><td>Descr:</td><td><textarea name=descr></textarea></td></tr></table>
-			<button >Add</button>
+			<button >Add</button></form>
 			
 		</div>
 
 			<h2><?php _e( 'Your managment Devices', $content ) ?></h2>
 			<?php
+		print "<table class=\"wp-list-table widefat fixed\">
+		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"pass\" class=\"manage-column column-name\">Password</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></thead>\n\n";
+
+
+		print "<tfoot><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"pass\" class=\"manage-column column-name\">Password</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></tfoot><tbody>\n\n";
+
+		// проверяем существование таблицы, если нету - создаем
+		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
+		{
+			print "[+] no table with device list, create new one!<br>\n";
+			GeoSets::init_devices_table();	
+		}
+
+		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES."' ") != 
+			$wpdb->prefix . GeoSets::DB_USERS_USER_DEVICES)
+		{
+			print "[+] no table with user_devices, create new one!<br>\n";
+			GeoSets::init_user_devices_table();	
+		}
+
+		$res = mysql_query("select id,serial_number,password,name,modify_time,lat,lng,alt,description,charge,status from ".
+			$wpdb->prefix. GeoSets::DB_USERS_DEVICES." where 1"); 
+
+		for ($i=0; $i<mysql_num_rows($res); $i++)
+		{
+			print "<tr><td>".mysql_result($res, $i, 'id')."</td><td>".mysql_result($res, $i, 'name')."</td><td>".mysql_result($res, $i, 'password');
+			print "</td><td>".mysql_result($res, $i, 'description')."</td><td>".mysql_result($res, $i, 'lat').", ";
+			print mysql_result($res, $i,'lng')." (alt ".mysql_result($res, $i,'alt')." meters)</td><td>".mysql_result($res, $i,'charge')."% </td>";
+			print "<td>".mysql_result($res, $i,'serial_number')."</td><td>".mysql_result($res, $i,'modify_time').
+				"</td><td>".mysql_result($res, $i,'status')."</td></tr>\n\n";
+		}
+		
+		
+		print "</tbody></table>";
+/*
+		$que = "select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ". 
+			 $wpdb->prefix. GeoSets::DB_USERS_DEVICES." where 1";
+		$lines = $wpdb->get_results(  $wpdb->prepare($que) );	
+
+		foreach ($lines as $dev)
+		{
+			print "<tr><td>".$dev['id']."</td><td>".$dev['name']."</td><td>".$dev['description']."</td>\n";
+			print "<td>".$dev['lat'].", ".$dev['lng']." (alt ".$dev['alt']." meters)</td><td>".$dev['charge']."</td>\n";
+			print "<td>".$dev['serial_number']."</td><td>".$dev['modify_time']."</td><td>".$dev['status']."</td></tr>\n\n";
+		}
+
+
 			$table = new GeoListDevicesTables();
 			$table->setData( $data );
 			$table->prepare_items();
-			$table->display();
+			$table->display();    */
 			?>
 		</div>
 
