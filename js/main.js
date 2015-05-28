@@ -18,6 +18,7 @@ jQuery(function($) {
    */
   var poligonRemoved;
 
+  var polygon_max_points = 12;
 
   /**
    * Clear selection, Clear point data
@@ -257,7 +258,7 @@ jQuery(function($) {
         position: google.maps.ControlPosition.TOP_CENTER,
         // types object on panel
         drawingModes: [
-          //google.maps.drawing.OverlayType.CIRCLE,
+          google.maps.drawing.OverlayType.MARKER,
           google.maps.drawing.OverlayType.POLYGON
           //google.maps.drawing.OverlayType.RECTANGLE
         ]
@@ -269,10 +270,10 @@ jQuery(function($) {
       //showPanel();
       //check point limit
       var objLimit = e.overlay.getPath().getArray().length,
-        tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape! Use less then ',
-        message = tMessage + ajax_object.limit;
+        tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape (objLimit)! Use less then ',
+        message = tMessage + polygon_max_points;
 
-      if (objLimit > +ajax_object.limit) {
+      if (objLimit > polygon_max_points) {
         alert(message);
         currectShape = e.overlay;
         deleteSelectedShape();
@@ -287,7 +288,7 @@ jQuery(function($) {
 
       function pointUpdate(index) {
         var length = this.getArray().length;
-        if (length > +ajax_object.limit) {
+        if (length > polygon_max_points) {
           alert(message);
           this.removeAt(index);
           return false;
@@ -437,13 +438,13 @@ jQuery(function($) {
 
       google.maps.event.addListener(newPoly, 'click', function() {
 
-        var loadpointsLimit = newPoly.getPath().getArray().length,
-          tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape! Use less then ',
+        var loadpointsLimit = polygon_max_points,
+          tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape addNewPolys! Use less then ',
           message = tMessage + ajax_object.limit;
 
         function pointUpdate(index) {
           var length = this.getArray().length;
-          if (loadpointsLimit < +ajax_object.limit && length > +ajax_object.limit) {
+          if ( length > plygon_max_points) {
             alert(message);
             currectShape = addShape;
             this.removeAt(index);
