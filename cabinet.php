@@ -17,6 +17,10 @@ if ( ! $user_id ){
 	}
 	?>
 	<?php do_action('showTable');?>
+
+	<br><br>
+	<?php do_action('showTable_devices');?>
+
 </div>
 
 <?php get_footer(); ?>

@@ -87,6 +87,9 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'admin_menu', array( 'GeoSets', 'geo_add_cabinet_pages' ) );
 		add_action( 'geo_main_page_view_hook', array( 'GeoSets', 'geo_main_page_view_hook' ) );
 		add_action( 'showTable', array( 'GeoSets', 'showTable' ) );
+
+		add_action( 'showTable_devices', array( 'GeoSets', 'showTable_devices' ) );
+
 		//call register settings function
 		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings' ) );
 
@@ -788,7 +791,7 @@ class GeoSets extends DataBaseCustomData {
 	}
 
 	/**
-	 * show table
+	 *  выводим таблицу полигонов пользователя
 	 */
 	public static function showTable() {
 		global $current_user;
@@ -878,6 +881,100 @@ class GeoSets extends DataBaseCustomData {
 			</table>
 		</div>
 		<?php
+	}
+
+
+	// создаем таблицу со списком устройств, если нету
+	private static function init_devices_table()
+	{
+		global $wpdb;
+
+		
+		$wpdb->query(
+			$wpdb->prepare("create table ".$wpdb->prefix.DB_USERS_DEVICES." if not exists (
+			id int(12) not null primary key auto_increment,
+			name char(80),
+			serial_number char(80),
+ 			modify_time datetime,
+ 			password char(40),
+			lat decimal(8, 5),
+			lng decimal(8, 5),
+			alt decimal(6,1)
+			description text,
+			status int( 8 ),
+			charge int( 8 )
+			)")
+		);
+
+
+	}
+
+
+	// создаем таблицу со списком устройств, если нету
+	private static function init_user_devices_table()
+	{
+		global $wpdb;
+
+		
+		$wpdb->query(
+			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." if not exists (
+			id int(12) not null primary key auto_increment,
+			user_id int(14),
+			device_id int(14)
+			)")
+		);
+
+
+	}
+
+	// выводим в кабинете список устройств, привязанных к юзеру
+	public static function showTable_devices() {
+		global $current_user;
+		global $wpdb;
+		get_currentuserinfo();
+
+		echo "<h2>Your devices</h2>";
+		print "<table class=\"wp-list-table widefat fixed\">
+		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></thead>\n\n";
+
+
+		print "<tfoot><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></tfoot>\n\n";
+
+		// проверяем существование таблицы, если нету - создаем
+		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
+			$this->init_devices_table();	
+
+		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES."' ") != 
+			$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES)
+			$this->init_user_devices_table();	
+
+		$lines = $wpdb->get_results("select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ". 
+			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
+			" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or $wpdb ->print_error();		
+
+		foreach ($lines as $dev)
+		{
+			print "<tr><td>".$dev['id']."</td><td>".$dev['name']."</td><td>".$dev['description']."</td><td>$dev_points</td>";
+			print "<td>".$dev['lat'].", ".$dev['lng']." (alt ".$dev['alt']." meters)</td><td>".$dev['charge']."</td>";
+			print "<td>".$dev['serial_number']."</td><td>".$dev['modify_time']."</td><td>".$dev['status']."</td></tr>\n\n";
+		}
+		
+		print "</tbody></table><br><hr>\n";
+
 	}
 
 	/**
@@ -1034,7 +1131,29 @@ class GeoSets extends DataBaseCustomData {
 
 		?>
 
-		<div class="wrapper">
+		<div class="wrapper"><br><button id='add_dev_btn'>Add device</button>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.11.3.min.js' ></script>
+		<script type="text/javascript">
+
+		$( document ).ready(function() {
+			$('#add_dev_form').hide();
+
+			$( "#add_dev_btn" ).click(function() {
+				  $('#add_dev_form').slideToggle();
+			});
+		});
+			
+		</script>	
+		<div id='add_dev_form'>
+			<table>
+			<tr><td>Name:</td><td><input type=text name=nam></td></tr>
+			<tr><td>Serial:</td><td><input type=text name=serial></td></tr>
+			<tr><td>Password:</td><td><input type=text name=pass></td></tr>
+                        <tr><td>Descr:</td><td><textarea name=descr></textarea></td></tr></table>
+			<button >Add</button>
+			
+		</div>
+
 			<h2><?php _e( 'Your managment Devices', $content ) ?></h2>
 			<?php
 			$table = new GeoListDevicesTables();
