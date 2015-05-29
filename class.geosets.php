@@ -1163,6 +1163,18 @@ class GeoSets extends DataBaseCustomData {
 
 	}
 
+	// простая функция генерации паролей
+	private static function generatePassword($length = 8) {
+    		$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    		$count = mb_strlen($chars);
+
+    	for ($i = 0, $result = ''; $i < $length; $i++) {
+       	 	$index = rand(0, $count - 1);
+        	$result .= mb_substr($chars, $index, 1);
+    	}
+
+    		return $result;
+	}
 	/**
 	 * view for cabinet dispatcher device page
 	 */
@@ -1170,6 +1182,7 @@ class GeoSets extends DataBaseCustomData {
 		global $current_user;
 		global $wpdb;
 
+		// добавляем девайс, генерим пароль если он не указан
 		if (isset($_POST['serial']))
 		{
 			$nam = mysql_escape_string($_POST['nam']);
@@ -1177,11 +1190,26 @@ class GeoSets extends DataBaseCustomData {
 			$pass = mysql_escape_string($_POST['pass']);
 			$dscr = mysql_escape_string($_POST['descr']);
 
+			if ($pass == '')
+				$pass = GeoSets::generatePassword(6);
+
 			if ($nam != '' && $serial != '' && $pass !='')
 				$wpdb->query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES.
 			" values (NULL, '$nam', '$serial', NOW(), '$pass', 0.0, 0.0, 0.0, '$dscr', 0, 100)") or $wpdb->print_error();
 			print "[+] added device.<br>\n";
 		}	
+
+		// удаление устройств, удаляем сам девайс и все привязки к нему пользователей
+		if (isset($_POST['del_device']))
+		{
+			$dev = 1*$_POST['del_device'];
+			
+			if ($dev > 0)
+			{
+				$wpdb->query("delete from ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=$dev");
+				$wpdb->query("delete from ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." where device_id=$dev");
+			}
+		}
 
 		get_currentuserinfo();
 		// table user points
@@ -1223,8 +1251,30 @@ class GeoSets extends DataBaseCustomData {
 
 			<h2><?php _e( 'Your managment Devices', $content ) ?></h2>
 			<?php
-		print "<table class=\"wp-list-table widefat fixed\">
-		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		print "
+		<script type='text/javascript' >
+		function checkform(frm) 
+		{
+			var aresure = confirm('Are you sure you want to delete?');
+			return aresure;
+		}
+		</script>
+
+		<table class=\"wp-list-table widefat fixed\">
+		<thead><tr>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"pass\" class=\"manage-column column-pass\">Password</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th>
+		<th scope=\"col\"></th>		
+		</tr></thead>\n\n";
+
+
+		print "<tfoot><tr>
 		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
 		<th scope=\"col\" id=\"pass\" class=\"manage-column column-name\">Password</th>
 		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
@@ -1232,18 +1282,8 @@ class GeoSets extends DataBaseCustomData {
 		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
 		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
 		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
-		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></thead>\n\n";
-
-
-		print "<tfoot><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
-		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
-		<th scope=\"col\" id=\"pass\" class=\"manage-column column-name\">Password</th>
-		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Description</th>
-		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Points</th>
-		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Charge</th>
-		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Serial number</th>
-		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
-		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th></tr></tfoot><tbody>\n\n";
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th>
+		<th scope=\"col\"></th></tr></tfoot><tbody>\n\n";
 
 		// проверяем существование таблицы, если нету - создаем
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
@@ -1264,11 +1304,13 @@ class GeoSets extends DataBaseCustomData {
 
 		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{
-			print "<tr><td>".mysql_result($res, $i, 'id')."</td><td>".mysql_result($res, $i, 'name')."</td><td>".mysql_result($res, $i, 'password');
+			$dev_id = 1*mysql_result($res, $i, 'id');
+			print "<tr><td style='width: 20px;'>".mysql_result($res, $i, 'name')."</td><td>".mysql_result($res, $i, 'password');
 			print "</td><td>".mysql_result($res, $i, 'description')."</td><td>".mysql_result($res, $i, 'lat').", ";
 			print mysql_result($res, $i,'lng')." (alt ".mysql_result($res, $i,'alt')." meters)</td><td>".mysql_result($res, $i,'charge')."% </td>";
-			print "<td>".mysql_result($res, $i,'serial_number')."</td><td>".mysql_result($res, $i,'modify_time').
-				"</td><td>".mysql_result($res, $i,'status')."</td></tr>\n\n";
+			print "<td>".mysql_result($res, $i,'serial_number')."</td><td>".mysql_result($res, $i,'modify_time')."</td><td>".
+			mysql_result($res, $i,'status')."</td><td><form method=POST onsubmit='return checkform($(this).parrent);'><input type=hidden name=del_device value='$dev_id' >".
+			"<input type=submit value='Delete'></form></td></tr>\n\n";
 		}
 		
 		
