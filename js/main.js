@@ -13,6 +13,9 @@ jQuery(function($) {
    * poligon on write
    */
   var poligon;
+
+  var newPolygons = [];
+  var polygons = [];
   /**
    * poligonRemoved flag
    */
@@ -219,6 +222,9 @@ jQuery(function($) {
       var centerPoligon = new google.maps.Polygon({
         path: coordAr
       });
+	
+	
+
       map.setCenter(polygonCenter(centerPoligon));
     }
     else if (navigator.geolocation) {
@@ -258,12 +264,14 @@ jQuery(function($) {
         position: google.maps.ControlPosition.TOP_CENTER,
         // types object on panel
         drawingModes: [
-          google.maps.drawing.OverlayType.MARKER,
+	  google.maps.drawing.OverlayType.POLYLINE,
           google.maps.drawing.OverlayType.POLYGON
           //google.maps.drawing.OverlayType.RECTANGLE
         ]
       }
     });
+
+	
 
     // poligon draw complete
     google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
@@ -296,6 +304,99 @@ jQuery(function($) {
         setSelection(addShape);
       }
 
+
+       // проверяем есть ли препятствие (запретная зона) по данным координатам
+ 	function possible_pass(x, y) {
+                
+		var chk_cors = new google.maps.LatLng(x, y);
+			
+		for (var i=0; i<polygons.length; i++)
+ 		{ 
+			if (google.maps.geometry.poly.containsLocation(chk_cors, polygons[i]))
+				return false;	
+		}
+			
+		return true;
+	}
+
+	google.maps.event.addListener(drawManager, 'polylinecomplete', function(e) {
+
+		var objList = e.getPath().getArray(); //.toString();
+
+		var x1 = objList[0].lat();
+		var y1 = objList[0].lng();
+		
+		var x2 = objList[1].lat();
+		var y2 = objList[1].lng();
+	//	var PF = require('pathfinding');
+	
+		var x_min, x_max;
+		var y_min, y_max;
+
+		if (x1 > 0 && x1 > x2)
+		{
+			x_min = x2;
+			x_max = x1;
+		} else {
+			x_min = x1;
+			x_max = x2;
+		}
+
+		if (y1 > 0 && y1 > y2)
+		{
+			y_min = y2;
+			y_max = y1;
+		} else {
+			y_min = y1;
+			y_max = y2;
+		}
+
+		var x_base = Math.floor(x_min) - 10;
+		var y_base = Math.floor(y_min) - 10;
+		var matrix = [];
+
+		var x_start = Math.floor( x1 - x_base);
+		var y_start = Math.floor( y1 - y_base);
+		
+		var x_fin = Math.floor(x2 - x_base);
+		var y_fin = Math.floor(y2 - y_base);
+
+		for (i=0; i<80;i++)
+		{
+			var line = [];
+			var cur_x = x_min + 1*i;
+
+			for (var j=0; j<80; j++)
+			{
+				var cur_y = y_min + 1*j;
+ 
+				if (possible_pass(cur_x, cur_y))
+					line[j] = 0;
+				else
+					line[j] = 1;
+			}
+			matrix[i] = line;
+		}
+
+		var grid = new PF.Grid(matrix);	
+			
+
+		alert('NOW CALL PATHFINDER() ! '+polygons.length);	
+
+
+		var finder = new PF.AStarFinder({
+                    checkFunction: function (points) {
+                        alert(points);
+                        return false;
+                    },
+                    diagonalMovement: 1
+                });
+
+                var res = finder.findPath(x_start, y_start, x_fin, y_fin, grid);
+		console.log(res);
+
+	});
+
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
 
         if (!poligonRemoved) {
@@ -316,6 +417,7 @@ jQuery(function($) {
     // Clear the current selection when the drawing mode is changed, or when the
     // map is clicked.
     google.maps.event.addListener(drawManager, 'drawingmode_changed', clearSelection);
+   
     // click on map
     google.maps.event.addListener(map, 'click', clearSelection);
     // rightclick
@@ -338,6 +440,7 @@ jQuery(function($) {
         return false;
       }
     });
+
 
     /**
      * get Center poligon
@@ -370,8 +473,7 @@ jQuery(function($) {
     }
 
     /* Load poligons from user save data*/
-    var newPolygons = [];
-    var polygons = [];
+
     var infoData = [];
     for (var inc = 0, ii = user_points.length; inc < ii; inc++) {
       var newCoords = [];
