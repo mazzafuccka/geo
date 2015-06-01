@@ -5,6 +5,7 @@ jQuery(function($) {
    * {} draw map global object
    */
   var drawManager;
+  var map='';
   /**
    * {} Currect shape object
    */
@@ -22,6 +23,7 @@ jQuery(function($) {
   var poligonRemoved;
 
   var polygon_max_points = 12;
+  var polyl = [];
 
   /**
    * Clear selection, Clear point data
@@ -201,7 +203,7 @@ jQuery(function($) {
    */
   function initialize() {
 
-    var map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDefaultUI: true,
@@ -323,78 +325,58 @@ jQuery(function($) {
 
 		var objList = e.getPath().getArray(); //.toString();
 
-		var x1 = objList[0].lat();
-		var y1 = objList[0].lng();
+		var x1 = objList[0].lng();
+		var y1 = objList[0].lat();
 		
-		var x2 = objList[1].lat();
-		var y2 = objList[1].lng();
-	//	var PF = require('pathfinding');
-	
-		var x_min, x_max;
-		var y_min, y_max;
+		var x2 = objList[1].lng();
+		var y2 = objList[1].lat();
 
-		if (x1 > 0 && x1 > x2)
-		{
-			x_min = x2;
-			x_max = x1;
-		} else {
-			x_min = x1;
-			x_max = x2;
-		}
+		var data = {
+      			"start_x": x1,
+ 			"start_y": y1,
+			"end_x": x2,
+			"end_y": y2
+    		};
+    
+		data = $(this).serialize() + "&" + $.param(data);
 
-		if (y1 > 0 && y1 > y2)
-		{
-			y_min = y2;
-			y_max = y1;
-		} else {
-			y_min = y1;
-			y_max = y2;
-		}
-
-		var x_base = Math.floor(x_min) - 10;
-		var y_base = Math.floor(y_min) - 10;
-		var matrix = [];
-
-		var x_start = Math.floor( x1 - x_base);
-		var y_start = Math.floor( y1 - y_base);
 		
-		var x_fin = Math.floor(x2 - x_base);
-		var y_fin = Math.floor(y2 - y_base);
-
-		for (i=0; i<80;i++)
-		{
-			var line = [];
-			var cur_x = x_min + 1*i;
-
-			for (var j=0; j<80; j++)
-			{
-				var cur_y = y_min + 1*j;
- 
-				if (possible_pass(cur_x, cur_y))
-					line[j] = 0;
-				else
-					line[j] = 1;
+		polyl.push(new google.maps.LatLng(y1, x1));
+				
+  		$.ajax({
+      			type: "GET",
+      			url: "astar_json2.php?start_x="+x1+"&start_y="+y1+"&end_x="+x2+"&end_y="+y2, 
+			cache: false,
+            		context: document.body,
+            		success: function(responseText) {
+                		$(".site-info").text(responseText);
+				draw_poly();
 			}
-			matrix[i] = line;
+    		});
+    		
+		function draw_poly()
+		{
+
+		jQuery.globalEval( $(".site-info").text() );
+		var myline = [];
+		
+		for (var i=0; i<path.length; i++)
+		{
+			var lng = path[i][1];	
+			var lat = path[i][0];
+			myline.push(new google.maps.LatLng(lat, lng));
 		}
 
-		var grid = new PF.Grid(matrix);	
-			
-
-		alert('NOW CALL PATHFINDER() ! '+polygons.length);	
-
-
-		var finder = new PF.AStarFinder({
-                    checkFunction: function (points) {
-                        alert(points);
-                        return false;
-                    },
-                    diagonalMovement: 1
-                });
-
-                var res = finder.findPath(x_start, y_start, x_fin, y_fin, grid);
-		console.log(res);
-
+		var flightPath = new google.maps.Polyline({
+ 			path: myline,
+    			geodesic: false,
+    			strokeColor: '#FF0000',
+    			strokeOpacity: 1.0,
+    			strokeWeight: 2
+  		});
+				
+  		flightPath.setMap(map);		
+		}
 	});
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
