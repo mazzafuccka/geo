@@ -388,9 +388,7 @@ class GeoSets extends DataBaseCustomData {
 
 		mysql_close($lnk);
 
-		$html = "\n\n
-		<script src=\"wp-content/themes/geotheme-master/js/pathfinding.js\"></script>
-	<script tyle='text/javascript' > var allPolygons = [ $poly_arr ];  </script>
+		$html = "\n\n<script tyle='text/javascript' > var allPolygons = [ $poly_arr ];  </script>
 
 		<!--content-->
         <div id='map'>" . home_url() . "</div>
@@ -440,6 +438,39 @@ class GeoSets extends DataBaseCustomData {
             <div class='actions'>
            		<button id='save-button'>" . __( 'Save', GeoSets::CONTENT ) . "</button>
                 <button id='delete-button'>" . __( 'Delete', GeoSets::CONTENT ) . "</button>
+            </div>
+        </div>
+
+  <div id='panel-path'>
+            <div class='info'>
+            <h2>Path is build</h2>
+            <!-- block edited information -->
+            <form id='object_form' method='post' enctype='multipart/form-data'>
+                <label for='name'>Name</label>
+                <input type='text' value='' name='name' required/>
+
+		<label for='description'>Description</label>
+                <textarea name='description'></textarea>
+
+		<label for='pathtype'>Type</label><select size=1 name=pathtype>
+		<option value=1>Wait for customer and return back</option>
+		<option value=2>Drop cargo and return back</option>
+		<option value=3>Hold this position</option>
+		</select> 
+
+                <input type='hidden' name='points' value=''/>
+                <input type='hidden' name='id' value=''/>
+                <input type='hidden' name='type_object' value='polyline'/>
+                <input type='hidden' name='action' value='save_path'/>
+                <input type='hidden' name='user_id' value='" . $current_user->ID . "'/>
+                " . wp_nonce_field( 'token_action', 'token' ) . "
+            </form>
+			</div>
+            <div class='actions'>
+           	<button id='save-button'>Save</button>
+           	<button id='save-button'>Save and Run!</button>
+                <button id='delete-button'>Delete</button>
+                
             </div>
         </div>
         ";

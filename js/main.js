@@ -370,6 +370,7 @@ jQuery(function($) {
 		var flightPath = new google.maps.Polyline({
  			path: myline,
     			geodesic: false,
+			editable: true,
     			strokeColor: '#FF0000',
     			strokeOpacity: 1.0,
     			strokeWeight: 2
