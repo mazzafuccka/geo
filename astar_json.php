@@ -1,15 +1,28 @@
 <?php
 
+	$lines = file("../../../wp-config.php");
+
+	foreach ($lines as $line)
+	{
+		if (strstr($line, 'DB_NAME') || strstr($line, 'DB_USER') || strstr($line, 'DB_PASSWORD') 
+			|| strstr($line, 'DB_HOST') || strstr($line, 'table_prefix'))
+			eval($line);
+
+	}
+	
+	$lines = file("class.geosets.php");
+	
+	foreach ($lines as $line)
+	{
+		if (strstr($line, 'const DB_USERS_POINTS'))
+			eval($line);
+	}
+
+	$polygon_table = $table_prefix.DB_USERS_POINTS;
+
 	// init connection to MySQL
-	$host="sql311.0fees.us";
-	$db_name = "0fe_15790014_test";
-	$user ="0fe_15790014";
-	$pass="qwe123";
-
-	$polygon_table = 'wwp_geosets_user_points';
-
-	$lnk = mysql_connect($host, $user, $pass) or die("cant connect to db");
-	$db = mysql_select_db($db_name, $lnk) or die("cant select db");
+	$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+	$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
     	mysql_query("set names utf8");
 
 // A* algorithm by aaz, found at 
