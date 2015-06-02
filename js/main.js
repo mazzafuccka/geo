@@ -345,7 +345,7 @@ jQuery(function($) {
 				
   		$.ajax({
       			type: "GET",
-      			url: "astar_json2.php?start_x="+x1+"&start_y="+y1+"&end_x="+x2+"&end_y="+y2, 
+      			url: "wp-content/plugins/geo-master/astar_json2.php?start_x="+x1+"&start_y="+y1+"&end_x="+x2+"&end_y="+y2, 
 			cache: false,
             		context: document.body,
             		success: function(responseText) {
