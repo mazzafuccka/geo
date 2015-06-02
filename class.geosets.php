@@ -547,7 +547,7 @@ class GeoSets extends DataBaseCustomData {
 									);
 								} else {
 									$response = array(
-										'error'  => array( 'Point not create' ),
+										'error'  => array( 'Point not create (db error)' ),
 										'action' => 'new_action',
 										'state'  => 'error',
 										'data'   => $res
@@ -567,7 +567,7 @@ class GeoSets extends DataBaseCustomData {
 									);
 								} else {
 									$response = array(
-										'error'  => array( 'Point not create' ),
+										'error'  => array( 'Point not create (on edit, db error)' ),
 										'action' => 'edit_action',
 										'state'  => 'error',
 										'data'   => $res
@@ -980,17 +980,21 @@ class GeoSets extends DataBaseCustomData {
 	// создаем таблицу со списком устройств, если нету
 	private static function init_user_devices_table()
 	{
-		global $wpdb;
+		global $wpdb; 
+
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
 		print "[+] init_user_devices_table() called<br>\n";
 		
-		$wpdb->query(
-			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." (
+		mysql_query("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." (
 			id int(12) not null auto_increment,
 			user_id int(14),
 			device_id int(14),
-			PRIMIARY KEY (id)
-			);")
-		);
+			PRIMARY KEY (id)
+			);") or die(mysql_error());
+
+		mysql_close($lnk);
 
 
 	}
@@ -1000,6 +1004,26 @@ class GeoSets extends DataBaseCustomData {
 		global $current_user;
 		global $wpdb;
 		get_currentuserinfo();
+
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
+
+
+		if (isset($_POST['serial']) && isset($_POST['pass']))	
+		{
+			$serial = mysql_escape_string($_POST['serial']);
+			$pass = mysql_escape_string($_POST['pass']);
+			
+			$res = mysql_query("select id from ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where serial_number='$serial' and password='$pass' ") 
+				or die(mysql_error());
+			$a = 1*mysql_result($res, 0, 0);
+			if ($a > 0)
+			{
+				mysql_query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." values (NULL, ".$current_user->ID.", $a)");
+				print "[+] ok!  ";	
+			} else print "<script language=Javascript>alert('Incorrect password for device!');</script>";
+		}
 
 		echo "<h2>Your devices</h2>";
 		print "<table class=\"wp-list-table widefat fixed\">
@@ -1031,20 +1055,17 @@ class GeoSets extends DataBaseCustomData {
 
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES."' ") != 
 			$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES)
-			$this->init_user_devices_table();	
+			GeoSets::init_user_devices_table();	
 /*
 		$lines = $wpdb->get_results("select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ". 
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 			" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or $wpdb ->print_error();		
 */
-		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
-		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
-    		mysql_query("set names utf8");
 
-		$res = mysql_query("select id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
-//			$wpdb->prefix. GeoSets::DB_USERS_DEVICES." where 1"); 
+
+		$res = mysql_query("select udev.id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
-				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID);
+				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
 
 		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{
@@ -1055,7 +1076,9 @@ class GeoSets extends DataBaseCustomData {
 				"</td><td>".mysql_result($res, $i,'status')."</td></tr>\n\n";
 		}
 		
-		print "</tbody></table><br><hr>\n";
+		print "</tbody></table><br><form method=POST>
+		Serial: <input type=text name=serial style='width: 70px;'> Password: <input type=text name=pass style='width: 70px;'> <input type=submit value='Add'><br>
+		</form><hr>\n";
 
 	}
 

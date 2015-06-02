@@ -9,7 +9,7 @@
     font-family: Arial, sans-serif;
     font-size: 13px;
     position: absolute;
-    top: 0;
+    top: 20px;
     right: 0;
     min-height: 520px;
     background-color: white;
@@ -45,6 +45,48 @@
     display: block;
     margin: 6px 0;
 }
+
+#panel-path {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    position: absolute;
+    top: 20px;
+    right: 0;
+    min-height: 520px;
+    background-color: white;
+    width: 300px;
+
+}
+
+#panel-path #delete-button {
+    margin-top: 5px;
+}
+
+#panel-path div.actions {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+}
+
+#panel-path .info {
+    padding: 1.5em;
+    padding-bottom: 75px;
+}
+
+#panel-path label {
+    padding: 5px 0;
+    clear:both;
+}
+#panel-path .dateTimeWrapper {
+    display: none;
+}
+#panel-path input[type="text"],
+#panel-path select,
+#panel-path textarea{
+    display: block;
+    margin: 6px 0;
+}
+
 .cabinet{
     position: absolute;
     left: 80px;
@@ -59,7 +101,7 @@
 
 .info-block{
     position: absolute;
-    top:0;
+    top:30px;
     right:0;
     z-index: 10;
 }
