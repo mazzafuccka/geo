@@ -445,7 +445,7 @@ class GeoSets extends DataBaseCustomData {
             <div class='info'>
             <h2>Path is build</h2>
             <!-- block edited information -->
-            <form id='object_form' method='post' enctype='multipart/form-data'>
+            <form id='path_form' method='post' enctype='multipart/form-data'>
                 <label for='name'>Name</label>
                 <input type='text' value='' name='name' required/>
 
@@ -467,9 +467,9 @@ class GeoSets extends DataBaseCustomData {
             </form>
 			</div>
             <div class='actions'>
-           	<button id='save-button'>Save</button>
-           	<button id='save-button'>Save and Run!</button>
-                <button id='delete-button'>Delete</button>
+           	<button id='path-save-button'>Save</button>
+           	<button id='path-save-button'>Save and Run!</button>
+                <button id='path-delete-button'>Delete</button>
                 
             </div>
         </div>
