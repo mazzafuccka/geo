@@ -101,6 +101,8 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'wp_ajax_delete_action', array( 'geoSets', 'delete_action' ) );
 		add_action( 'wp_ajax_edit_action', array( 'geoSets', 'edit_action' ) );
 
+		add_action( 'wp_ajax_save_path', array( 'geoSets', 'save_path' ) );
+
 		//cabinet page template
 		add_filter( 'page_template', array( 'geoSets', 'geo_cabinet_page_template' ) );
 
@@ -223,7 +225,8 @@ class GeoSets extends DataBaseCustomData {
 		routes_points geometry NOT NULL COMMENT 'routes coordinates',
 		create_time datetime DEFAULT NOW() NOT NULL COMMENT 'create route time',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
-		status tinyint(1) DEFAULT '2' COMMENT 'status route, 0 - disabled, 1 - revision, 2 - active',
+		typ int(4) comment '1 - wait and return, 2- drop cargo and return, 3- hold position',
+		status tinyint(2) DEFAULT '2' COMMENT 'status route, 0 - disabled, 1 - revision, 2 - active',
 		UNIQUE KEY id (id),
         INDEX (device_id),
         INDEX (user_id),
@@ -447,18 +450,16 @@ class GeoSets extends DataBaseCustomData {
             <!-- block edited information -->
             <form id='path_form' method='post' enctype='multipart/form-data'>
                 <label for='name'>Name</label>
-                <input type='text' value='' name='name' required/>
+                <input type='text' value='' id='pname' name='name' required/>
 
-		<label for='description'>Description</label>
-                <textarea name='description'></textarea>
-
-		<label for='pathtype'>Type</label><select size=1 name=pathtype>
-		<option value=1>Wait for customer and return back</option>
-		<option value=2>Drop cargo and return back</option>
-		<option value=3>Hold this position</option>
+		<label for='pathtype'>Type</label><select id='ptyp' size=1 name=pathtype tyle='font-size: 12px;'>
+		<option value=1 style='font-size: 12px;'>Wait for customer and return back</option>
+		<option value=2 style='font-size: 12px;'>Drop cargo and return back</option>
+		<option value=3 style='font-size: 12px;'>Hold this position</option>
 		</select> 
 
-                <input type='hidden' name='points' value=''/>
+                <input id='polypath' type='hidden' name='points' value=''/>
+		<input id='path-state' type='hidden' name=state value=1>
                 <input type='hidden' name='id' value=''/>
                 <input type='hidden' name='type_object' value='polyline'/>
                 <input type='hidden' name='action' value='save_path'/>
@@ -468,11 +469,62 @@ class GeoSets extends DataBaseCustomData {
 			</div>
             <div class='actions'>
            	<button id='path-save-button'>Save</button>
-           	<button id='path-save-button'>Save and Run!</button>
+           	<button id='path-save-button2'>Save and Run!</button><br><br>
                 <button id='path-delete-button'>Delete</button>
                 
             </div>
         </div>
+
+	<script language=JavaScript>
+		$(function() {
+    			jQuery('#path-save-button').click(function(){
+				var path = $('#polypath').val();
+				var typ = $('#ptyp').val();
+				var nam = $('#pname').val();
+
+				jQuery.ajax({
+				type: 'POST',   // Adding Post method
+				url: 'wp-admin/admin-ajax.php', // Including ajax file
+				data: {'action': 'save_path', 'path':path,'name':nam, 'state':1, 'typ': typ}, // Sending data
+				success: function(data){ // Show returned data using the function.
+										var infoBlock = $('.info-block');
+					infoBlock.html('Path saved!');
+					if (!infoBlock.hasClass('success')) {
+        					infoBlock.addClass('success').removeClass('error');
+      					}
+					
+      					infoBlock.css('visibility', 'visible');
+					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
+					}
+				});
+			});	
+
+			$('#path-save-button2').click(function() {
+				var name = $('#polypath').val();
+				var typ = $('#ptyp').val();
+
+				jQuery.ajax({
+				type: 'POST',   // Adding Post method
+				url: '".admin_url( 'admin-ajax.php' )."', // Including ajax file
+				data: {'action': 'save_path', 'path':name, 'state': 2, 'typ': typ}, // Sending data 
+				success: function(data){ // Show returned data using the function.
+					var infoBlock = $('.info-block');
+					infoBlock.html('Path saved!');
+					if (!infoBlock.hasClass('success')) {
+        					infoBlock.addClass('success').removeClass('error');
+      					}
+					
+      					infoBlock.css('visibility', 'visible');
+					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
+					}
+				});
+			});
+
+			$('#path-delete-button').click(function() {
+  				location.reload();
+			});	
+		});
+	</script>
         ";
 
 		self::get_user_data();
@@ -605,6 +657,67 @@ class GeoSets extends DataBaseCustomData {
 				}
 			}
 
+		}
+	}
+
+	public static function save_path() 
+	{
+		global $current_user;
+		get_currentuserinfo();
+
+		if ( is_user_logged_in() ) {
+		
+
+		$height = 1; // later make normal altitude
+		$dev_id = 0; // for test, later normal
+		
+
+		$state = 1*$_POST['state'];
+		$nam = mysql_escape_string($_POST['name']);
+		$line = mysql_escape_string($_POST['path']);
+		$typ = mysql_escape_string($_POST['typ']);		
+
+		global $wpdb; 
+
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
+
+		if (mysql_query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES." values (NULL, '$nam', $height, $dev_id, ".$current_user->ID.
+			", GeomFromText('$line'), NOW(), NOW(), $typ, $state)"))
+		{
+
+			$response = array(
+			'error'  => array(),
+			'action' => 'save_path',
+			'state'  => 'success',
+			'data'   => ''
+			);
+
+		} else {
+			$response = array(
+			'error'  => array('failed save to DB'),
+			'action' => 'save_path',
+			'state'  => 'error',
+			'data'   => ''
+			);
+
+		}
+
+		wp_send_json( $response );
+		mysql_close($lnk);
+
+		} else {
+
+
+			$response = array(
+			'error'  => array('You are not logged id!'),
+			'action' => 'save_path',
+			'state'  => 'error',
+			'data'   => ''
+			);
+
+			wp_send_json( $response );
 		}
 	}
 

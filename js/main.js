@@ -203,6 +203,9 @@ jQuery(function($) {
    */
   function initialize() {
 
+
+    $('#panel-path').hide();
+
     map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -359,13 +362,20 @@ jQuery(function($) {
 
 		jQuery.globalEval( $(".site-info").text() );
 		var myline = [];
-		
+		var line_str = "LINESTRING(";
+
 		for (var i=0; i<path.length; i++)
 		{
 			var lng = path[i][1];	
 			var lat = path[i][0];
 			myline.push(new google.maps.LatLng(lat, lng));
+
+			if (i == 0)
+				line_str = line_str + lat+' '+lng+' ';
+			else
+				line_str = line_str + ', '+lat+' '+lng+' ';
 		}
+		line_str = line_str + ')';
 
 		var flightPath = new google.maps.Polyline({
  			path: myline,
@@ -377,6 +387,9 @@ jQuery(function($) {
   		});
 				
   		flightPath.setMap(map);		
+
+		$('#polypath').val(line_str);
+		$('#panel-path').show();
 		}
 	});
 
