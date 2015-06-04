@@ -224,6 +224,7 @@ class GeoSets extends DataBaseCustomData {
 		height int(6) COMMENT 'height of routes',
 		device_id int(11) NOT NULL COMMENT 'device_id for route',
 		user_id int(11) NOT NULL COMMENT 'user_id route',
+		pass char(30),
 		routes_points geometry NOT NULL COMMENT 'routes coordinates',
 		create_time datetime DEFAULT NOW() NOT NULL COMMENT 'create route time',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
@@ -692,6 +693,8 @@ class GeoSets extends DataBaseCustomData {
 		$line = mysql_escape_string($_POST['path']);
 		$typ = mysql_escape_string($_POST['typ']);		
 
+		$pw = GeoSets::generatePassword(6);
+
 		global $wpdb; 
 
 		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
@@ -699,7 +702,7 @@ class GeoSets extends DataBaseCustomData {
     		mysql_query("set names utf8");
 
 		if (mysql_query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES." values (NULL, '$nam', $height, $dev_id, ".$current_user->ID.
-			", GeomFromText('$line'), NOW(), NOW(), $typ, $state)"))
+			", '$pw', GeomFromText('$line'), NOW(), NOW(), $typ, $state)"))
 		{
 
 			$response = array(
