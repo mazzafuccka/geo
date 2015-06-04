@@ -14,6 +14,7 @@ jQuery(function($) {
    * poligon on write
    */
   var poligon;
+  var my_flightPath = '';
 
   var newPolygons = [];
   var polygons = [];
@@ -43,11 +44,18 @@ jQuery(function($) {
    * @param shape
    */
   function setSelection(shape) {
+    $('#accept-btn').hide()
     clearSelection(shape);
     currectShape = shape;
     shape.setEditable(true);
     showPanel();
     setPointData(currectShape);
+    var st = $('#xxxa').text();
+
+    if (st == 'Treatment')
+    { 	
+	$('#accept-btn').show();
+    }
   }
 
 
@@ -155,6 +163,7 @@ jQuery(function($) {
   function showPanel() {
     var panel = document.getElementById('panel');
     panel.style.display = 'block';
+
   }
 
 
@@ -377,7 +386,7 @@ jQuery(function($) {
 		}
 		line_str = line_str + ')';
 
-		var flightPath = new google.maps.Polyline({
+		my_flightPath = new google.maps.Polyline({
  			path: myline,
     			geodesic: false,
 			editable: true,
@@ -386,12 +395,84 @@ jQuery(function($) {
     			strokeWeight: 2
   		});
 				
-  		flightPath.setMap(map);		
+  		my_flightPath.setMap(map);		
 
 		$('#polypath').val(line_str);
 		$('#panel-path').show();
 		}
 	});
+
+
+		$('#path-save-button').click(function(){
+				var i=0, cords='LINESTRING(';
+				var path = my_flightPath.getPath();
+				path.forEach(function(latLng){ 
+
+					if (i>0) cords = cords + ','; 
+					cords = cords + ' '+latLng.lat()+' '+latLng.lng(); i++ 
+				
+				});
+				cords = cords + ')';
+
+				var path = cords; // $('#polypath').val();
+				var typ = $('#ptyp').val();
+				var nam = $('#pname').val();
+
+				jQuery.ajax({
+				type: 'POST',   // Adding Post method
+				url: 'wp-admin/admin-ajax.php', // Including ajax file
+				data: {'action': 'save_path', 'path':path,'name':nam, 'state':1, 'typ': typ}, // Sending data
+				success: function(data){ // Show returned data using the function.
+										var infoBlock = $('.info-block');
+					infoBlock.html('Path saved!');
+					if (!infoBlock.hasClass('success')) {
+        					infoBlock.addClass('success').removeClass('error');
+      					}
+					
+      					infoBlock.css('visibility', 'visible');
+					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
+					}
+				});
+			});
+
+
+			$('#path-save-button2').click(function() {
+				var i=0, cords='LINESTRING(';
+				var path = my_flightPath.getPath();
+				path.forEach(function(latLng){ 
+
+					if (i>0) cords = cords + ','; 
+					cords = cords + ' '+latLng.lat()+' '+latLng.lng(); i++ 
+				
+				});
+				cords = cords + ')';
+
+				var path = cords; // $('#polypath').val();
+				var typ = $('#ptyp').val();
+				var nam = $('#pname').val();
+
+				jQuery.ajax({
+				type: 'POST',   // Adding Post method
+				url: 'wp-admin/admin-ajax.php', // Including ajax file
+				data: {'action': 'save_path', 'path':path,'name':nam, 'state':2, 'typ': typ}, // Sending data 
+				success: function(data){ // Show returned data using the function.
+					var infoBlock = $('.info-block');
+					infoBlock.html('Path saved!');
+					if (!infoBlock.hasClass('success')) {
+        					infoBlock.addClass('success').removeClass('error');
+      					}
+					
+      					infoBlock.css('visibility', 'visible');
+					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
+					}
+				});
+			});
+
+			$('#path-delete-button').click(function() {
+  				location.reload();
+			});	
+	
+
 
       google.maps.event.addListener(drawManager, 'polygoncomplete', function(e) {
 

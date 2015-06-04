@@ -103,6 +103,8 @@ class GeoSets extends DataBaseCustomData {
 
 		add_action( 'wp_ajax_save_path', array( 'geoSets', 'save_path' ) );
 
+		add_action( 'wp_ajax_accept_area', array( 'geoSets', 'accept_area' ) );
+
 		//cabinet page template
 		add_filter( 'page_template', array( 'geoSets', 'geo_cabinet_page_template' ) );
 
@@ -407,9 +409,9 @@ class GeoSets extends DataBaseCustomData {
             <h2>" . __( 'Edit Object', GeoSets::CONTENT ) . "</h2>
             <!-- block edited information -->
             <form id='object_form' method='post' enctype='multipart/form-data'>
-                <div class='status' style='display:none;'>
+                <div id='area-stat'  class='status' style='display:none;'>
 	                <label for='name'>" . __( 'Status', GeoSets::CONTENT ) . ":</label>
-	                <span data-name='status'></span><br/>
+	                <span id='xxxa' data-name='status'></span><br/>
                 </div>
                 <label for='name'>" . __( 'Name', GeoSets::CONTENT ) . "</label>
                 <input type='text' value='' name='name' required/>
@@ -431,7 +433,7 @@ class GeoSets extends DataBaseCustomData {
                 <textarea name='description'></textarea>
 
                 <input type='hidden' name='points' value=''/>
-                <input type='hidden' name='id' value=''/>
+                <input type='hidden' name='id' id='area_id' value=''/>
                 <input type='hidden' name='type_object' value='polygon'/>
                 <input type='hidden' name='action' value='new_action'/>
                 <input type='hidden' name='user_id' value='" . $current_user->ID . "'/>
@@ -440,7 +442,8 @@ class GeoSets extends DataBaseCustomData {
 			</div>
             <div class='actions'>
            		<button id='save-button'>" . __( 'Save', GeoSets::CONTENT ) . "</button>
-                <button id='delete-button'>" . __( 'Delete', GeoSets::CONTENT ) . "</button>
+                <button id='delete-button'>" . __( 'Delete', GeoSets::CONTENT ) . "</button><br><br>
+		<button id='accept-btn' >Accept this area</button>
             </div>
         </div>
 
@@ -477,51 +480,24 @@ class GeoSets extends DataBaseCustomData {
 
 	<script language=JavaScript>
 		$(function() {
-    			jQuery('#path-save-button').click(function(){
-				var path = $('#polypath').val();
-				var typ = $('#ptyp').val();
-				var nam = $('#pname').val();
-
+    			$('#accept-btn').hide();
+			$('#accept-btn').click(function() {
+  				var aid = $('#area_id').val();
 				jQuery.ajax({
 				type: 'POST',   // Adding Post method
 				url: 'wp-admin/admin-ajax.php', // Including ajax file
-				data: {'action': 'save_path', 'path':path,'name':nam, 'state':1, 'typ': typ}, // Sending data
-				success: function(data){ // Show returned data using the function.
-										var infoBlock = $('.info-block');
-					infoBlock.html('Path saved!');
-					if (!infoBlock.hasClass('success')) {
-        					infoBlock.addClass('success').removeClass('error');
-      					}
-					
-      					infoBlock.css('visibility', 'visible');
-					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
-					}
-				});
-			});	
-
-			$('#path-save-button2').click(function() {
-				var name = $('#polypath').val();
-				var typ = $('#ptyp').val();
-
-				jQuery.ajax({
-				type: 'POST',   // Adding Post method
-				url: '".admin_url( 'admin-ajax.php' )."', // Including ajax file
-				data: {'action': 'save_path', 'path':name, 'state': 2, 'typ': typ}, // Sending data 
+				data: {'action': 'accept_area', 'areaid': aid}, // Sending data
 				success: function(data){ // Show returned data using the function.
 					var infoBlock = $('.info-block');
-					infoBlock.html('Path saved!');
+					infoBlock.html('Area accepted!');
 					if (!infoBlock.hasClass('success')) {
         					infoBlock.addClass('success').removeClass('error');
       					}
 					
       					infoBlock.css('visibility', 'visible');
-					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel-path').slideUp('slow'); }, 3000);
+					setTimeout(function() { $('.info-block').css('visibility', 'hidden'); $('#panel').slideUp('slow'); }, 2000);
 					}
 				});
-			});
-
-			$('#path-delete-button').click(function() {
-  				location.reload();
 			});	
 		});
 	</script>
@@ -659,6 +635,45 @@ class GeoSets extends DataBaseCustomData {
 
 		}
 	}
+
+
+	public static function accept_area() 
+	{
+		global $current_user, $wpdb;
+		get_currentuserinfo();
+
+		if ( is_user_logged_in() ) {
+		
+			$area = 1*$_POST['areaid'];
+			
+			// check here if user got permission to do that....
+			$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+			$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    			mysql_query("update ".$wpdb->prefix.GeoSets::DB_USERS_POINTS." set status=1 where id=$area ");
+			$response = array(
+			'error'  => array(),
+			'action' => 'accept_area',
+			'state'  => 'success',
+			'data'   => ''
+			);
+			mysql_close($lnk);
+
+		} else {
+
+			$response = array(
+			'error'  => array('You are not logged id!'),
+			'action' => 'accept_area',
+			'state'  => 'error',
+			'data'   => ''
+			);
+
+		}
+
+		
+		wp_send_json( $response );
+
+	}
+
 
 	public static function save_path() 
 	{
