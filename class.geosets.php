@@ -393,9 +393,34 @@ class GeoSets extends DataBaseCustomData {
 			$poly_arr .= $poly_obj;			
 		} 
 
+		// get devices list!
+
+		$res = mysql_query("select devs.id,name,lat,lng,alt,charge,status from ".
+			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
+				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
+
+		$dev_list = "<h3>Ваши устройства:</h3><table><tr><th>Device</th><th>Altitude</th><th>Battery</th></tr>";
+		$arr = "var devices_list = [";
+		for ($i=0; $i<mysql_num_rows($res); $i++)
+		{
+			$did = mysql_result($res, $i, 0);
+			$d_nam = mysql_result($res, $i, 1);
+			$d_lat = mysql_result($res, $i, 2);	
+			$d_lng = mysql_result($res, $i, 3);
+			$alt = mysql_result($res, $i, 4);
+			$charge = mysql_result($res, $i, 5);
+			
+			$dev_list .= "<tr><td>$d_nam</td><td>$alt m</td><td>$charge %</td></tr>\n"; 
+
+			$arr .= "{ 'name': '$d_nam', 'lat':'$d_lat', 'lng':'$d_lng', 'alt':'$alt', 'charge':'$charge' },\n";
+	
+		}
+		$arr .= "];";
+		$dev_list .= "</table>";
+
 		mysql_close($lnk);
 
-		$html = "\n\n<script tyle='text/javascript' > var allPolygons = [ $poly_arr ];  </script>
+		$html = "\n\n<script tyle='text/javascript' > var allPolygons = [ $poly_arr ]; $arr </script>
 
 		<!--content-->
         <div id='map'>" . home_url() . "</div>
@@ -405,6 +430,8 @@ class GeoSets extends DataBaseCustomData {
         </div>
 
         <div class='info-block error' style='visibility:hidden;'></div>
+
+	<div id='device_list' style='width:450px;display: inline-block; float: left;'>$dev_list</div>
 
         <div id='panel'>
             <div class='info'>

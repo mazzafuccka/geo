@@ -224,6 +224,7 @@ jQuery(function($) {
 
     var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
 
+
     // geolocation center
     if (typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0) {
       var coordConverted = convertCoord(ajax_object.coord);
@@ -253,6 +254,31 @@ jQuery(function($) {
       // default city
       map.setCenter(defaultGeo);
     }
+
+	var m_markers = [];
+	var m_infobox =[];
+	for (var k=0; k<devices_list.length; k++)
+	{
+		var dev = devices_list[k];
+		var myLatlng = new google.maps.LatLng(dev.lat, dev.lng);
+		var ibox = new google.maps.InfoWindow({
+      			content: 'Name: '+dev.name+'<br>Altitude: '+dev.alt+'m<br>Charge: '+dev.charge+'%'
+  		});
+		m_infobox.push(ibox);
+
+		var mark = new google.maps.Marker({
+ 		     position: myLatlng,
+      		     map: map,
+      		     title: dev.name,
+		     infowindow: ibox
+  		});
+
+		google.maps.event.addListener(mark, 'click', function() {
+       			 this.infowindow.open(map, this);
+		});
+
+		m_markers.push(mark);
+	}
 
     var polyOptions = {
       strokeWeight: 0,
@@ -317,6 +343,8 @@ jQuery(function($) {
         }
         setSelection(addShape);
       }
+
+
 
 
        // проверяем есть ли препятствие (запретная зона) по данным координатам
