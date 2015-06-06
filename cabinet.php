@@ -20,7 +20,8 @@ if ( ! $user_id ){
 
 	<br><br>
 	<?php do_action('showTable_devices');?>
-
+	<br><br>
+	<?php do_action('showTable_routes');?>
 </div>
 
 <?php get_footer(); ?>

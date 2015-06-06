@@ -89,6 +89,7 @@ class GeoSets extends DataBaseCustomData {
 		add_action( 'showTable', array( 'GeoSets', 'showTable' ) );
 
 		add_action( 'showTable_devices', array( 'GeoSets', 'showTable_devices' ) );
+		add_action( 'showTable_routes', array( 'GeoSets', 'showTable_routes' ) );
 
 		//call register settings function
 		add_action( 'admin_init', array( 'GeoSets', 'register_mysettings' ) );
@@ -1130,6 +1131,102 @@ class GeoSets extends DataBaseCustomData {
 
 	}
 
+
+	public static function showTable_routes() {
+		global $current_user;
+		global $wpdb;
+		get_currentuserinfo();
+
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
+	
+		if (isset($_POST['route_id']) && isset($_POST['act']))
+		{
+			$rid = 1*$_POST['route_id'];
+			$act = $_POST['act'];
+
+			if ($act == 'delete')
+				mysql_query("delete from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES." where id=$rid");
+
+			if ($act == 'start')
+				mysql_query("update ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES." set status=2 where id=$rid");
+
+			if ($act == 'stop')
+				mysql_query("update ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES." set status=0 where id=$rid");
+			
+		}
+
+		echo "<script type='text/javascript' >
+		function checkform() 
+		
+			var aresure = confirm('Are you sure?');
+			return aresure;
+		}
+		</script><h2>Your routes</h2>";
+		print "<table class=\"wp-list-table widefat fixed\">
+		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Height</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Device_id</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Pass</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Type</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th><th></th></tr></thead>\n\n";
+
+
+		print "<tfoot><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
+		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
+		<th scope=\"col\" id=\"description\" class=\"manage-column column-description\">Height</th>
+		<th scope=\"col\" id=\"points\" class=\"manage-column column-end_time\">Device_id</th>
+		<th scope=\"col\" id=\"charge\" class=\"manage-column column-type\">Pass</th>
+		<th scope=\"col\" id=\"serial\" class=\"manage-column column-points\">Type</th>
+		<th scope=\"col\" id=\"modify_time\" class=\"manage-column column-modify_time\">Modify time</th>
+		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th><th></th></tr></tfoot><tbody>\n\n";
+
+
+		$res = mysql_query("select id, name, height, device_id dev, pass, typ, modify_time, status,(select name from ".
+			$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=dev ) from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES.
+			" where user_id=".$current_user->ID." order by status desc") or die(mysql_error());
+
+		for ($i=0; $i<mysql_num_rows($res); $i++)
+		{
+			$r_id = 1*mysql_result($res, $i, 0); 
+			$typ = 1*mysql_result($res, $i, 5);
+			$stat = 1*mysql_result($res, $i, 7);
+
+			$type = "Wait client and return";
+			if ($typ == 2)
+				$type = "Drop cargo and return";
+			if ($typ == 3)
+				$type = "Hold this position";
+
+			$state = "Stopped";
+			if ($stat == 0)
+				$state = "Inactive";
+			if ($stat == 2)
+				$state = "Running";
+
+			if ($stat == 2)
+			{
+				$controls = "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='stop'>\n";
+				$controls .= "<input type=submit value='Stop'></form>";
+			} else {
+				$controls = "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='start'>\n";
+				$controls .= "<input type=submit value='Start!'></form>";
+				$controls .= "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='delete'>\n";
+				$controls .= "<input type=submit value='Delete'></form>";
+			}
+
+			print "<tr><td>".mysql_result($res, $i, 0)."</td><td>".mysql_result($res, $i, 1)."</td><td>".mysql_result($res, $i, 2)."</td><td>";
+			print mysql_result($res, $i, 8)." (dev id ".mysql_result($res, $i, 3).")</td><td>".mysql_result($res, $i, 4);
+			print "</td><td>$type</td><td>".mysql_result($res, $i, 6)."</td><td>$state</td><td>$controls</td></tr>\n\n";
+		}
+		print "</tbody></table>\n\n";
+
+		mysql_close($lnk);
+	}
+
 	// выводим в кабинете список устройств, привязанных к юзеру
 	public static function showTable_devices() {
 		global $current_user;
@@ -1194,7 +1291,7 @@ class GeoSets extends DataBaseCustomData {
 */
 
 
-		$res = mysql_query("select udev.id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
+		$res = mysql_query("select devs.id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
 
