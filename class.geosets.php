@@ -420,7 +420,9 @@ class GeoSets extends DataBaseCustomData {
 
 		mysql_close($lnk);
 
-		$html = "\n\n<script tyle='text/javascript' > var allPolygons = [ $poly_arr ]; $arr </script>
+		$html = "\n\n
+		<script type='text/javascript' src='wp-content/plugins/geo-master/js/ajax_path.js' ></script>
+		<script type='text/javascript' > var allPolygons = [ $poly_arr ]; $arr </script>
 
 		<!--content-->
         <div id='map'>" . home_url() . "</div>
@@ -897,6 +899,10 @@ class GeoSets extends DataBaseCustomData {
 	 *
 	 */
 	public static function geo_settings_page() {
+
+		$fl = file('../wp-content/plugins/geo-master/js/ajax_path.js') or die('cant open '.getcwd());
+		$ln = explode("\"", $fl[0]);
+		
 		?>
 		<div class="wrap">
 			<h2><?php _e( 'Geo settings', self::CONTENT ) ?></h2>
@@ -923,6 +929,11 @@ class GeoSets extends DataBaseCustomData {
 								<li class="description"><?php _e( 'Set options type for select dropdown, user "code value" [space] "description" on one row.<br/>View example:<br/> 15 Type1<br/> 20 Type2', self::CONTENT ) ?></li>
 							</ul>
 						</td>
+					</tr>
+
+					<tr valign=top>
+						<th scope='row'>Pathfinding AJAX script:</th>
+						<td><input type=text name='path_ajax' style='width:400px;' value='<?php echo $ln[1]; ?>' ></td>
 					</tr>
 				</table>
 

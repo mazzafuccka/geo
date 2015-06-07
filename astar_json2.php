@@ -115,8 +115,9 @@ function a_star($start, $target, $neighbors, $heuristic) {
 
 // Example with maze
 
-$width  = 60;
-$height = 60;
+$width  = 120;
+$height = 120;
+$MESH_GRID = 0.01;
 $pregrad = 0;
 
 $map = array_fill(0, $height, str_repeat(' ', $width));
@@ -154,14 +155,61 @@ function neighbors($i) {
 function heuristic($i, $j) {
     list ($i_x, $i_y) = coord($i);
     list ($j_x, $j_y) = coord($j);
-    // return abs($i_x - $j_x)*abs($i_y - $j_y)/2;
-    return sqrt( ($i_x - $j_x)*($i_x - $j_x) + ($i_y - $j_y)*($i_y - $j_y) );
+    return (abs($i_x - $j_x) + abs($i_y - $j_y))/2;
+    // return sqrt( ($i_x - $j_x)*($i_x - $j_x) + ($i_y - $j_y)*($i_y - $j_y) );
 }
+
+function check_cross_line($lat1,$lng1, $lat2,$lng2)
+{
+	global $polygon_table;
+
+	$res = mysql_query("SELECT sum( crosses(pnt.points, GeomFromText('LINESTRING( $lat1 $lng1, $lat2 $lng2 )') ) ) FROM $polygon_table pnt WHERE 1") 
+		or die	(mysql_error('oh shit'));
+
+	if (mysql_result($res, 0, 0) > 0)
+		return true;
+	else
+		return false;
+}
+
+function optimize_path($my_path, $b_x, $b_y)
+{
+	global $polygon_table, $MESH_GRID;
+	$path = $my_path;
+	for ($i=0; $i<(sizeof($path)-3); $i++)
+	{
+		list ($x1, $y1) = coord($path[$i]);	
+		list ($x2, $y2) = coord($path[$i+2]);	
+		list ($x3, $y3) = coord($path[$i+3]);	
+
+		$lng1 = $b_x + $MESH_GRID*$x1;
+		$lat1 = $b_y + $MESH_GRID*$y1;
+
+		$lng2 = $b_x + $MESH_GRID*$x2;
+		$lat2 = $b_y + $MESH_GRID*$y2;
+
+		$lng3 = $b_x + $MESH_GRID*$x3;
+		$lat3 = $b_y + $MESH_GRID*$y3;
+
+
+		$res = mysql_query("SELECT sum( crosses(pnt.points, GeomFromText('LINESTRING( $lat1 $lng1, $lat3 $lng3 )') ) ) FROM $polygon_table pnt WHERE 1") 
+			or die	(mysql_error('oh shit'));
+		if (mysql_result($res, 0 ,0) == 0)
+		{
+			array_splice($path, $i+1);	
+			array_splice($path, $i+2);
+			$i+1;
+		} 
+	}
+
+	return $path;
+}
+
 
 // fill the grid
 function generate($b_x, $b_y) {
 
-	global $map, $width, $height,$pregrad, $polygon_table;
+	global $map, $width, $height,$pregrad, $polygon_table, $MESH_GRID;
 
 
 	$tbl_ind = rand(1000,9999);	
@@ -182,12 +230,25 @@ function generate($b_x, $b_y) {
 	
         for ($i=0; $i<$width; $i++)
 	{
-		$cur_lng = $lng + 0.02*$i;
+		$cur_lng = $lng + $MESH_GRID*$i;
 
-		for ($k=0;$k<$height; $k++)
+		for ($k=0;$k<$height; $k+=10)
 		{
-			$cur_lat = $lat + 0.02*$k;
-			mysql_query("insert into tmp_points_".$tbl_ind." values (NULL, $cur_lat, $cur_lng, $i, $k);");
+			$cur_lat = $lat + $MESH_GRID*$k;
+			$cur_lat1 = $lat + $MESH_GRID*($k+1);
+			$cur_lat2 = $lat + $MESH_GRID*($k+2);
+			$cur_lat3 = $lat + $MESH_GRID*($k+3);
+			$cur_lat4 = $lat + $MESH_GRID*($k+4);
+			$cur_lat5 = $lat + $MESH_GRID*($k+5);
+			$cur_lat6 = $lat + $MESH_GRID*($k+6);
+			$cur_lat7 = $lat + $MESH_GRID*($k+7);
+			$cur_lat8 = $lat + $MESH_GRID*($k+8);
+			$cur_lat9 = $lat + $MESH_GRID*($k+9);
+			mysql_query("insert into tmp_points_".$tbl_ind." values (NULL, $cur_lat, $cur_lng, $i, $k),
+				(NULL, $cur_lat1, $cur_lng, $i,".($k+1)."),(NULL, $cur_lat2, $cur_lng, $i, ".($k+2).
+			"),(NULL, $cur_lat3, $cur_lng, $i,".($k+3)."),(NULL, $cur_lat4, $cur_lng, $i, ".($k+4).
+			"),(NULL, $cur_lat5, $cur_lng, $i,".($k+5)."),(NULL, $cur_lat6, $cur_lng, $i,".($k+6)."),(NULL, $cur_lat7, $cur_lng, $i,".
+			($k+7)."),(NULL, $cur_lat8, $cur_lng, $i, ".($k+8)."),(NULL, $cur_lat9, $cur_lng, $i, ".($k+9).");") or die(mysql_error());
 		}	
 	}
 	
@@ -202,9 +263,18 @@ function generate($b_x, $b_y) {
 		$y = mysql_result($res, $i, 1);
 		$pregrad++;
 		$map[$y][$x] = 'A'; // mark as non-passable 
+		// set non passable all points around also
+		$map[$y+1][$x] = 'A';
+		$map[$y-1][$x] = 'A';
+		$map[$y][$x-1] = 'A';
+		$map[$y][$x+1] = 'A';
+		$map[$y-1][$x-1]='A';
+		$map[$y-1][$x+1]='A';
+		$map[$y+1][$x-1]='A';
+		$map[$y+1][$x+1]='A';
 	}
 
-	mysql_query("drop table tmp_points_".$tbl_ind );	
+	// mysql_query("drop table tmp_points_".$tbl_ind );	
 }
 
 	// get input coordinates
@@ -228,6 +298,17 @@ function generate($b_x, $b_y) {
 	else
 		$e_y = 1*$_POST['end_y'];
 
+	
+	// check, if our path crosses no areas, return simple path!
+	$res = mysql_query("SELECT sum( crosses(pnt.points, GeomFromText('LINESTRING( $s_y $s_x, $e_y $e_x )') ) ) FROM $polygon_table pnt WHERE 1");
+	if (mysql_result($res, 0, 0) == 0)
+	{
+		$response = "var path = [[$s_y, $s_x],";
+		$response .= " [$e_y, $e_x] ]; alert('loaded ok, pregrad 0');\n";
+		echo $response;
+		exit; 
+	}
+
 	// calculate coordinates base
 	if ($s_x>0 && $e_x>0 && $s_x < $e_x)
    		$base_x = $s_x - 0.3;
@@ -242,11 +323,11 @@ function generate($b_x, $b_y) {
 	// generate grid 
 	generate($base_x, $base_y);
 
-	$start_x = round(($s_x - $base_x)/0.02);
-	$start_y = round(($s_y - $base_y)/0.02);
+	$start_x = round(($s_x - $base_x)/$MESH_GRID);
+	$start_y = round(($s_y - $base_y)/$MESH_GRID);
 
-	$end_x = round(($e_x - $base_x)/0.02);
-	$end_y = round(($e_y - $base_y)/0.02);
+	$end_x = round(($e_x - $base_x)/$MESH_GRID);
+	$end_y = round(($e_y - $base_y)/$MESH_GRID);
 
 	print "var st_pnt=[".$start_x." ,".$start_y."];";
 	print "var end_pnt=[".$end_x." ,".$end_y."];";
@@ -259,13 +340,15 @@ function generate($b_x, $b_y) {
 	$steps = 0;
 	$response = "var path = [[$s_y, $s_x],";
 
+	// $path = optimize_path($path, $base_x, $base_y);
+
 	array_unshift($path, $start);
 	foreach ($path as $i) {
     		list ($x, $y) = coord($i);
     		// print "$x, $y\n"; 
     		$map[$y][$x] = '*';
-		$clng = $base_x + $x*0.02;
-		$clat = $base_y + $y*0.02;
+		$clng = $base_x + $x*$MESH_GRID;
+		$clat = $base_y + $y*$MESH_GRID;
     		$response = $response . "[$clat, $clng], ";
 		$ress['lat'] = $clat;
 		$ress['lng'] = $clng;  // just for test!
