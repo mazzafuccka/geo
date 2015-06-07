@@ -6,6 +6,8 @@ jQuery(function($) {
    */
   var drawManager;
   var map='';
+  var draw_mode=0;
+  var start_lat=0, start_lng=0;
   /**
    * {} Currect shape object
    */
@@ -184,6 +186,7 @@ jQuery(function($) {
       currectShape.setMap(null);
       currectShape = null;
       drawManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+      draw_mode = 3; // polygon
       hidePanel();
     }
   }
@@ -206,151 +209,10 @@ jQuery(function($) {
     return result;
   }
 
-
-  /**
-   * init map
-   */
-  function initialize() {
-
-
-    $('#panel-path').hide();
-
-    map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 10,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true,
-      zoomControl: true
-    });
-
-    var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
-
-
-    // geolocation center
-    if (typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0) {
-      var coordConverted = convertCoord(ajax_object.coord);
-      var coordAr = [];
-      var coordSplit = coordConverted.split(',');
-      for (var i = 0; i < coordSplit.length; i++) {
-        var elem = coordSplit[i].split(' ');
-        coordAr.push(new google.maps.LatLng(elem[0], elem[1]));
-      }
-      var centerPoligon = new google.maps.Polygon({
-        path: coordAr
-      });
-	
-	
-
-      map.setCenter(polygonCenter(centerPoligon));
-    }
-    else if (navigator.geolocation) {
-      var showPosition = function(position) {
-        map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
-      };
-      navigator.geolocation.getCurrentPosition(showPosition, function() {
-        map.setCenter(defaultGeo);
-      });
-    }
-    else {
-      // default city
-      map.setCenter(defaultGeo);
-    }
-
-	var m_markers = [];
-	var m_infobox =[];
-	for (var k=0; k<devices_list.length; k++)
-	{
-		var dev = devices_list[k];
-		var myLatlng = new google.maps.LatLng(dev.lat, dev.lng);
-		var ibox = new google.maps.InfoWindow({
-      			content: 'Name: '+dev.name+'<br>Altitude: '+dev.alt+'m<br>Charge: '+dev.charge+'%'
-  		});
-		m_infobox.push(ibox);
-
-		var mark = new google.maps.Marker({
- 		     position: myLatlng,
-      		     map: map,
-      		     title: dev.name,
-		     infowindow: ibox
-  		});
-
-		google.maps.event.addListener(mark, 'click', function() {
-       			 this.infowindow.open(map, this);
-		});
-
-		m_markers.push(mark);
-	}
-
-    var polyOptions = {
-      strokeWeight: 0,
-      fillOpacity: 0.45,
-      editable: true
-    };
-    // method drawing
-    // https://developers.google.com/maps/documentation/javascript/overlays?csw=1#drawing_tools
-    drawManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYGON,
-      markerOptions: {
-        draggable: true
-      },
-      polylineOptions: {
-        editable: true
-      },
-      rectangleOptions: polyOptions,
-      circleOptions: polyOptions,
-      polygonOptions: polyOptions,
-      map: map,
-      drawingControlOptions: {
-        // Editor panel to center
-        position: google.maps.ControlPosition.TOP_CENTER,
-        // types object on panel
-        drawingModes: [
-	  google.maps.drawing.OverlayType.POLYLINE,
-          google.maps.drawing.OverlayType.POLYGON
-          //google.maps.drawing.OverlayType.RECTANGLE
-        ]
-      }
-    });
-
-	
-
-    // poligon draw complete
-    google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
-      //showPanel();
-      //check point limit
-      var objLimit = e.overlay.getPath().getArray().length,
-        tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape (objLimit)! Use less then ',
-        message = tMessage + polygon_max_points;
-
-      if (objLimit > polygon_max_points) {
-        alert(message);
-        currectShape = e.overlay;
-        deleteSelectedShape();
-        return;
-      }
-      drawManager.setDrawingMode(null);
-      var addShape = e.overlay;
-      addShape.type = e.type;
-      google.maps.event.addListener(addShape, 'click', function() {
-        setSelection(addShape);
-      });
-
-      function pointUpdate(index) {
-        var length = this.getArray().length;
-        if (length > polygon_max_points) {
-          alert(message);
-          this.removeAt(index);
-          return false;
-        }
-        setSelection(addShape);
-      }
-
-
-
-
        // проверяем есть ли препятствие (запретная зона) по данным координатам
- 	function possible_pass(x, y) {
+ 	function possible_pass(lat, lng) {
                 
-		var chk_cors = new google.maps.LatLng(x, y);
+		var chk_cors = new google.maps.LatLng(lat, lng);
 			
 		for (var i=0; i<polygons.length; i++)
  		{ 
@@ -361,41 +223,10 @@ jQuery(function($) {
 		return true;
 	}
 
-	google.maps.event.addListener(drawManager, 'polylinecomplete', function(e) {
 
-		var objList = e.getPath().getArray(); //.toString();
 
-		var x1 = objList[0].lng();
-		var y1 = objList[0].lat();
-		
-		var x2 = objList[1].lng();
-		var y2 = objList[1].lat();
-
-		var data = {
-      			"start_x": x1,
- 			"start_y": y1,
-			"end_x": x2,
-			"end_y": y2
-    		};
-    
-		data = $(this).serialize() + "&" + $.param(data);
-
-		
-		polyl.push(new google.maps.LatLng(y1, x1));
-				
-  		$.ajax({
-      			type: "GET",
-      			url: "wp-content/plugins/geo-master/astar_json2.php?start_x="+x1+"&start_y="+y1+"&end_x="+x2+"&end_y="+y2, 
-			cache: false,
-            		context: document.body,
-            		success: function(responseText) {
-                		$(".site-info").text(responseText);
-				draw_poly();
-			}
-    		});
-    		
-		function draw_poly()
-		{
+	function draw_poly()
+	{
 
 		jQuery.globalEval( $(".site-info").text() );
 		var myline = [];
@@ -427,11 +258,9 @@ jQuery(function($) {
 
 		$('#polypath').val(line_str);
 		$('#panel-path').show();
-		}
-	});
+	}
 
-
-		$('#path-save-button').click(function(){
+$('#path-save-button').click(function(){
 				var i=0, cords='LINESTRING(';
 				var path = my_flightPath.getPath();
 				path.forEach(function(latLng){ 
@@ -497,8 +326,194 @@ jQuery(function($) {
 			});
 
 			$('#path-delete-button').click(function() {
-  				location.reload();
+  				my_flightPath.setMap(null);	
+				$('#panel-path').hide();
 			});	
+
+  /**
+   * init map
+   */
+  function initialize() {
+
+
+    $('#panel-path').hide();
+
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 10,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true,
+      zoomControl: true
+    });
+
+    var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
+
+
+    // geolocation center
+    if (typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0) {
+      var coordConverted = convertCoord(ajax_object.coord);
+      var coordAr = [];
+      var coordSplit = coordConverted.split(',');
+      for (var i = 0; i < coordSplit.length; i++) {
+        var elem = coordSplit[i].split(' ');
+        coordAr.push(new google.maps.LatLng(elem[0], elem[1]));
+      }
+      var centerPoligon = new google.maps.Polygon({
+        path: coordAr
+      });
+	
+	
+
+      map.setCenter(polygonCenter(centerPoligon));
+    }
+    else if (navigator.geolocation) {
+      var showPosition = function(position) {
+        map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude), 13);
+      };
+      navigator.geolocation.getCurrentPosition(showPosition, function() {
+        map.setCenter(defaultGeo);
+      });
+    }
+    else {
+      // default city
+      map.setCenter(defaultGeo);
+    }
+
+	var m_markers = [];
+	var m_infobox =[];
+	for (var k=0; k<devices_list.length; k++)
+	{
+		var dev = devices_list[k];
+		var myLatlng = new google.maps.LatLng(dev.lat, dev.lng);
+		var ibox = new google.maps.InfoWindow({
+      			content: 'Name: '+dev.name+'<br>Altitude: '+dev.alt+'m<br>Charge: '+dev.charge+'%'
+  		});
+		m_infobox.push(ibox);
+
+		var mark = new google.maps.Marker({
+ 		     position: myLatlng,
+      		     map: map,
+      		     title: dev.name,
+		     infowindow: ibox,
+		     lat: dev.lat,
+                     lng: dev.lng
+  		});
+
+		google.maps.event.addListener(mark, 'click', function() {
+       			this.infowindow.open(map, this);
+			start_lat = this.lat;
+                        start_lng = this.lng;
+			this.map.setOptions({draggableCursor:'crosshair'});
+		});
+
+		m_markers.push(mark);
+	}
+
+    var polyOptions = {
+      strokeWeight: 0,
+      fillOpacity: 0.45,
+      editable: true
+    };
+    // method drawing
+    // https://developers.google.com/maps/documentation/javascript/overlays?csw=1#drawing_tools
+    drawManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      markerOptions: {
+        draggable: true
+      },
+      polylineOptions: {
+        editable: true
+      },
+      rectangleOptions: polyOptions,
+      circleOptions: polyOptions,
+      polygonOptions: polyOptions,
+      map: map,
+      drawingControlOptions: {
+        // Editor panel to center
+        position: google.maps.ControlPosition.TOP_CENTER,
+        // types object on panel
+        drawingModes: [
+	  google.maps.drawing.OverlayType.POLYLINE,
+          google.maps.drawing.OverlayType.POLYGON
+          //google.maps.drawing.OverlayType.RECTANGLE
+        ]
+      }
+    });
+
+	
+
+    // poligon draw complete
+    google.maps.event.addListener(drawManager, 'overlaycomplete', function(e) {
+      //showPanel();
+      //check point limit
+      var objLimit = e.overlay.getPath().getArray().length,
+        tMessage = typeof translate !== 'undefined' ? translate.m_limit : 'Limit point on shape (objLimit)! Use less then ',
+        message = tMessage + polygon_max_points;
+
+      if (objLimit > polygon_max_points) {
+        alert(message);
+        currectShape = e.overlay;
+        deleteSelectedShape();
+        return;
+      }
+      drawManager.setDrawingMode(null);
+      draw_mode=0;
+      var addShape = e.overlay;
+      addShape.type = e.type;
+      google.maps.event.addListener(addShape, 'click', function() {
+        setSelection(addShape);
+	start_lat =0; start_lng=0;
+      });
+
+      function pointUpdate(index) {
+        var length = this.getArray().length;
+        if (length > polygon_max_points) {
+          alert(message);
+          this.removeAt(index);
+          return false;
+        }
+        setSelection(addShape);
+      }
+
+
+	google.maps.event.addListener(drawManager, 'polylinecomplete', function(e) 
+	{
+
+		var objList = e.getPath().getArray(); //.toString();
+
+		var x1 = objList[0].lng();
+		var y1 = objList[0].lat();
+		
+		var x2 = objList[1].lng();
+		var y2 = objList[1].lat();
+
+		var data = {
+      			"start_x": x1,
+ 			"start_y": y1,
+			"end_x": x2,
+			"end_y": y2
+    		};
+    
+		data = $(this).serialize() + "&" + $.param(data);
+
+		
+		polyl.push(new google.maps.LatLng(y1, x1));
+				
+  		$.ajax({
+      			type: "GET",
+      			url: "wp-content/plugins/geo-master/astar_json2.php?start_x="+x1+"&start_y="+y1+"&end_x="+x2+"&end_y="+y2, 
+			cache: false,
+            		context: document.body,
+            		success: function(responseText) {
+                		$(".site-info").text(responseText);
+				draw_poly();
+			}
+    		});
+    		
+
+	});
+
+
+		
 	
 
 
@@ -521,14 +536,80 @@ jQuery(function($) {
 
     // Clear the current selection when the drawing mode is changed, or when the
     // map is clicked.
-    google.maps.event.addListener(drawManager, 'drawingmode_changed', clearSelection);
+    google.maps.event.addListener(drawManager, 'drawingmode_changed', function(e){
+
+		start_lat=0;
+		start_lng=0;
+
+		if (drawManager.drawingMode == null)
+		{
+			draw_mode = 0;
+		}
+
+		if (drawManager.drawingMode == google.maps.drawing.OverlayType.POLYGON)
+		{
+
+			draw_mode = 3;
+		}
+
+		if (drawManager.drawingMode == google.maps.drawing.OverlayType.POLYLINE)
+		{
+			
+			draw_mode = 2;
+		}
+
+		clearSelection;
+	});
    
     // click on map
-    google.maps.event.addListener(map, 'click', clearSelection);
+    google.maps.event.addListener(map, 'click', function(event){
+
+	var end_lat=0, end_lng=0;
+
+	// if selected one marker, draw path to this point.
+	if (draw_mode == 0 && start_lng!=0 && start_lat!=0)
+	{
+		end_lat = event.latLng.lat();
+    		end_lng = event.latLng.lng();
+	
+		if (possible_pass(end_lat, end_lng))
+		{
+			var data = {
+      			"start_x": start_lng,
+ 			"start_y": start_lat,
+			"end_x": end_lng,
+			"end_y": end_lat
+    			};
+    
+			data = $(this).serialize() + "&" + $.param(data);
+
+			// polyl.push(new google.maps.LatLng(start_lat, start_lng));
+				
+  			$.ajax({
+      			type: "GET",
+      			url: "wp-content/plugins/geo-master/astar_json2.php?start_x="+start_lng+"&start_y="+start_lat+"&end_x="+end_lng+"&end_y="+end_lat, 
+			cache: false,
+            		context: document.body,
+            		success: function(responseText) {
+                		$(".site-info").text(responseText);
+				draw_poly();
+				}
+    			});
+    		
+
+		} else {
+			alert('this area is not passable!');
+		}
+	}		
+
+	clearSelection;
+    });
+
     // rightclick
     google.maps.event.addListener(map, 'rightclick', function(e) {
       poligon = e.overlay;
       drawManager.setDrawingMode(null);
+      draw_mode=0;
       poligon.setMap(null);
       poligonRemoved = true;
       hidePanel();
