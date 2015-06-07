@@ -587,7 +587,7 @@ $('#path-save-button').click(function(){
 				
   			$.ajax({
       			type: "GET",
-      			url: "wp-content/plugins/geo-master/astar_json2.php?start_x="+start_lng+"&start_y="+start_lat+"&end_x="+end_lng+"&end_y="+end_lat, 
+      			url: pathfinding_path+"?start_x="+start_lng+"&start_y="+start_lat+"&end_x="+end_lng+"&end_y="+end_lat, 
 			cache: false,
             		context: document.body,
             		success: function(responseText) {
