@@ -274,7 +274,7 @@ function generate($b_x, $b_y) {
 		$map[$y+1][$x+1]='A';
 	}
 
-	// mysql_query("drop table tmp_points_".$tbl_ind );	
+	mysql_query("drop table tmp_points_".$tbl_ind );	
 }
 
 	// get input coordinates
