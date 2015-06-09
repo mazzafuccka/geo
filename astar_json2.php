@@ -255,7 +255,7 @@ function generate($b_x, $b_y) {
 
 	// now get list of all points what are not passable;
 	$res = mysql_query("select x, y, lat, lng from $polygon_table poly, tmp_points_".$tbl_ind." pnt WHERE ST_CONTAINS(poly.points, 
-        Point(pnt.lat, pnt.lng))") or die(mysql_error(''));
+        Point(pnt.lat, pnt.lng)) and poly.status=1") or die(mysql_error(''));
 	
 	for ($i=0; $i<mysql_num_rows($res); $i++)
 	{
