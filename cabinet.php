@@ -19,9 +19,27 @@ if ( ! $user_id ){
 	<?php do_action('showTable');?>
 
 	<br><br>
-	<?php do_action('showTable_devices');?>
+	<?php 
+
+		if ( is_user_logged_in() ) 
+		{
+			$userRole = ($current_user->data->wp_capabilities);
+			$role = key($userRole);
+			unset($userRole);
+			
+			switch($role) {
+				case ('administrator'||'editor'):
+					do_action('showTable_devices');
+					print "<br><br>\n\n";
+					do_action('showTable_routes');
+					break;
+				default:
+					break;
+			}
+		}
+		?>
 	<br><br>
-	<?php do_action('showTable_routes');?>
+
 </div>
 
 <?php get_footer(); ?>

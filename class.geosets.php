@@ -542,13 +542,30 @@ class GeoSets extends DataBaseCustomData {
 	 * method load require scripts
 	 */
 	public static function load_scripts() {
+		global $current_user;
+
 		wp_register_script( 'gmaps-draw', '//maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing' );
 		wp_register_script( 'datetime', plugins_url( '/js/vendor/jquery.datetimepicker.js', __FILE__ ) );
-		wp_enqueue_script(
-			'geo',
-			plugins_url( '/js/main.js', __FILE__ ),
-			array( 'jquery', 'gmaps-draw', 'datetime' )
-		);
+
+		if ( is_user_logged_in() ) 
+		{
+			$userRole = ($current_user->data->wp_capabilities);
+			$role = key($userRole);
+			unset($userRole);
+			
+			switch($role) {
+				case ('administrator'||'editor'||'contributor'||'author'):
+					wp_enqueue_script('geo',plugins_url( '/js/main.js', __FILE__ ),
+						array( 'jquery', 'gmaps-draw', 'datetime' ) );
+					break;
+				default:
+					wp_enqueue_script('geo',plugins_url( '/js/main_mini.js', __FILE__ ), 
+						array( 'jquery', 'gmaps-draw', 'datetime' )  );
+					break;
+			}
+		}
+
+		
 		// add info
 		wp_localize_script( 'geo', 'ajax_object',
 			array(
