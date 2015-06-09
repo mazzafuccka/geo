@@ -371,7 +371,7 @@ class GeoSets extends DataBaseCustomData {
 	
 		$poly_arr="";
 
-		$res = mysql_query("select AsText(points) from ".$wpdb->prefix.GeoSets::DB_USERS_POINTS);
+		$res = mysql_query("select AsText(points) from ".$wpdb->prefix.GeoSets::DB_USERS_POINTS." where status=1");
 
 		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{

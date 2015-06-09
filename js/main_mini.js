@@ -238,6 +238,17 @@ jQuery(function($) {
     var defaultGeo = new google.maps.LatLng(55.75222, 37.61556); //?
 
 
+    for (var i=0; i<allPolygons.length; i++)
+    {
+       	var cords = allPolygons[i];
+     	var myPol = new google.maps.Polygon({
+        	strokeWeight: 0,
+		path: cords,
+        	fillOpacity: 0.45
+      		});
+	myPol.setMap(map); 
+    }
+
     // geolocation center
     if (typeof ajax_object !== 'undefined' && ajax_object.coord.length > 0) {
       var coordConverted = convertCoord(ajax_object.coord);
