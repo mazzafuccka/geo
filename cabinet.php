@@ -23,18 +23,15 @@ if ( ! $user_id ){
 
 		if ( is_user_logged_in() ) 
 		{
-			$userRole = ($current_user->data->wp_capabilities);
+			$userRole = ($current_user->caps);
 			$role = key($userRole);
 			unset($userRole);
 			
-			switch($role) {
-				case ('administrator'||'editor'):
-					do_action('showTable_devices');
-					print "<br><br>\n\n";
-					do_action('showTable_routes');
-					break;
-				default:
-					break;
+			if (strstr($role, 'administrator') || strstr($role, 'editor'))
+			{	
+				do_action('showTable_devices');
+				print "<br><br>\n\n";
+				do_action('showTable_routes');
 			}
 		}
 		?>
