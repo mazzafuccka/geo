@@ -549,19 +549,21 @@ class GeoSets extends DataBaseCustomData {
 
 		if ( is_user_logged_in() ) 
 		{
-			$userRole = ($current_user->data->wp_capabilities);
+			$userRole = ($current_user->caps);
 			$role = key($userRole);
 			unset($userRole);
 			
-			switch($role) {
-				case ('administrator'||'editor'||'contributor'||'author'):
-					wp_enqueue_script('geo',plugins_url( '/js/main.js', __FILE__ ),
+			if (strstr($role, 'administrator') || strstr($role, 'editor'))
+			{	
+				wp_enqueue_script('geo',plugins_url( '/js/main.js', __FILE__ ),
 						array( 'jquery', 'gmaps-draw', 'datetime' ) );
-					break;
-				default:
-					wp_enqueue_script('geo',plugins_url( '/js/main_mini.js', __FILE__ ), 
+			}
+
+			if (strstr($role, 'subscriber'))
+			{
+				wp_enqueue_script('geo',plugins_url( '/js/main_mini.js', __FILE__ ), 
 						array( 'jquery', 'gmaps-draw', 'datetime' )  );
-					break;
+			
 			}
 		}
 

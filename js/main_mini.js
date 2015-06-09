@@ -226,6 +226,7 @@ jQuery(function($) {
 
 
     $('#panel-path').hide();
+    $('#device_list').hide();
 
     map = new google.maps.Map(document.getElementById('map'), {
       zoom: 10,
@@ -292,9 +293,8 @@ jQuery(function($) {
         position: google.maps.ControlPosition.TOP_CENTER,
         // types object on panel
         drawingModes: [
-	  google.maps.drawing.OverlayType.POLYLINE,
           google.maps.drawing.OverlayType.POLYGON
-          //google.maps.drawing.OverlayType.RECTANGLE
+
         ]
       }
     });
