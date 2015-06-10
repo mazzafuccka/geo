@@ -695,7 +695,7 @@ class GeoSets extends DataBaseCustomData {
 		if ( is_user_logged_in() ) {
 		
 			$area = 1*$_POST['areaid'];
-			
+
 			// check here if user got permission to do that....
 			$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
 			$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
@@ -706,6 +706,23 @@ class GeoSets extends DataBaseCustomData {
 			'state'  => 'success',
 			'data'   => ''
 			);
+
+			// now send email notifications to all dispatchers around!
+			
+			// SELECT user_id uid,meta_value,(select user_email from wwp_users where id=uid) FROM wwp_usermeta WHERE 
+			// meta_key like '%_capabilities' and meta_value not like '%subscriber%';
+			$res = mysql_query("SELECT user_id uid,meta_value,(select user_email from ".$wpdb->prefix."_users where id=uid) FROM ".$wpdb->prefix.
+			   "_usermeta WHERE meta_key like '%_capabilities' and meta_value not like '%subscriber%';"); 
+
+			$title = "New restricted area is accepted!";
+			$txt = "new restricted Area with id $area is accepted! ";
+
+			for ($i=0; $i<mysql_num_rows($res); $i++)
+			{
+				$ml = mysql_escape_string($res,$i, 2);
+				wp_mail($ml, $title, $txt);
+			}
+
 			mysql_close($lnk);
 
 		} else {
