@@ -1260,7 +1260,7 @@ class GeoSets extends DataBaseCustomData {
 
 
 		$res = mysql_query("select id, ur.name, height, device_id dev, pass, typ, modify_time, status,(select name from ".
-			$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=ur.dev ) from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES.
+			$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=ur.device_id ) from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES.
 			" ur where user_id=".$current_user->ID." order by status desc") or die(mysql_error());
 
 		for ($i=0; $i<mysql_num_rows($res); $i++)
