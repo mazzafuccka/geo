@@ -1537,7 +1537,10 @@ class GeoSets extends DataBaseCustomData {
 	public static function geo_dispatcher_device_page() {
 		global $current_user;
 		global $wpdb;
-
+		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
+		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
+    		mysql_query("set names utf8");
+	
 		// добавляем девайс, генерим пароль если он не указан
 		if (isset($_POST['serial']))
 		{
