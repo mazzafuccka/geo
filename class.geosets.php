@@ -227,7 +227,7 @@ class GeoSets extends DataBaseCustomData {
 		user_id int(11) NOT NULL COMMENT 'user_id route',
 		pass char(30),
 		routes_points geometry NOT NULL COMMENT 'routes coordinates',
-		create_time datetime DEFAULT NOW() NOT NULL COMMENT 'create route time',
+		create_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'create route time',
 		modify_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL COMMENT 'modifications row time',
 		typ int(4) comment '1 - wait and return, 2- drop cargo and return, 3- hold position',
 		status tinyint(2) DEFAULT '2' COMMENT 'status route, 0 - disabled, 1 - revision, 2 - active',
@@ -395,7 +395,7 @@ class GeoSets extends DataBaseCustomData {
 
 		// get devices list!
 
-		$res = mysql_query("select devs.id,name,lat,lng,alt,charge,status from ".
+		$res = mysql_query("select devs.id,devs.name,lat,lng,alt,charge,status from ".
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
 
@@ -1259,9 +1259,9 @@ class GeoSets extends DataBaseCustomData {
 		<th scope=\"col\" id=\"status\" class=\"manage-column column-status\">Status</th><th></th></tr></tfoot><tbody>\n\n";
 
 
-		$res = mysql_query("select id, name, height, device_id dev, pass, typ, modify_time, status,(select name from ".
-			$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=dev ) from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES.
-			" where user_id=".$current_user->ID." order by status desc") or die(mysql_error());
+		$res = mysql_query("select id, ur.name, height, device_id dev, pass, typ, modify_time, status,(select name from ".
+			$wpdb->prefix.GeoSets::DB_USERS_DEVICES." where id=ur.dev ) from ".$wpdb->prefix.GeoSets::DB_USERS_ROUTES.
+			" ur where user_id=".$current_user->ID." order by status desc") or die(mysql_error());
 
 		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{
@@ -1365,7 +1365,7 @@ class GeoSets extends DataBaseCustomData {
 */
 
 
-		$res = mysql_query("select devs.id,serial_number,name,modify_time,lat,lng,alt,description,charge,status from ".
+		$res = mysql_query("select devs.id,serial_number,devs.name,modify_time,lat,lng,alt,description,charge,status from ".
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
 
