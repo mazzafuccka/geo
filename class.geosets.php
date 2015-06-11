@@ -213,7 +213,7 @@ class GeoSets extends DataBaseCustomData {
 			id int(12) not null auto_increment,
 			user_id int(14),
 			device_id int(14),
-			PRIMIARY KEY (id)
+			PRIMARY KEY (id)
 			) $charset_collate;";
 		dbDelta( $sql_user_device );
 
