@@ -421,7 +421,7 @@ class GeoSets extends DataBaseCustomData {
 		mysql_close($lnk);
 
 		$html = "\n\n
-		<script type='text/javascript' src='wp-content/plugins/geo-master/js/ajax_path.js' ></script>
+		<script type='text/javascript' src='".plugins_url('/js/ajax_path.js',__FILE__)."' ></script>
 		<script type='text/javascript' > var allPolygons = [ $poly_arr ]; $arr </script>
 
 		<!--content-->
@@ -936,7 +936,7 @@ class GeoSets extends DataBaseCustomData {
 	 */
 	public static function geo_settings_page() {
 
-		$fl = file('../wp-content/plugins/geo-master/js/ajax_path.js') or die('cant open '.getcwd());
+		$fl = file('../'.plugins_url('/js/ajax_path.js', __FILE__)) or die('cant open '.getcwd());
 		$ln = explode("\"", $fl[0]);
 		
 		?>
@@ -1537,6 +1537,7 @@ class GeoSets extends DataBaseCustomData {
 	public static function geo_dispatcher_device_page() {
 		global $current_user;
 		global $wpdb;
+
 		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
 		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
     		mysql_query("set names utf8");
