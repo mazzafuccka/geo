@@ -50,11 +50,13 @@ jQuery(function($) {
     clearSelection(shape);
     currectShape = shape;
     shape.setEditable(true);
+    $('panel-path').hide();
     showPanel();
     setPointData(currectShape);
-    var st = $('#xxxa').text();
-
-    if (st == 'Treatment')
+    var st = shape.get('info');
+    // alert(st.status);  $('#xxxa').text();
+    
+    if (st.status == 'Treatment')
     { 	
 	$('#accept-btn').show();
     }
@@ -400,6 +402,9 @@ $('#path-save-button').click(function(){
 
 		google.maps.event.addListener(mark, 'click', function() {
        			this.infowindow.open(map, this);
+			hidePanel();
+                        $('panel-path').hide();
+
 			start_lat = this.lat;
                         start_lng = this.lng;
 			this.map.setOptions({draggableCursor:'crosshair'});
@@ -477,7 +482,7 @@ $('#path-save-button').click(function(){
 
 	google.maps.event.addListener(drawManager, 'polylinecomplete', function(e) 
 	{
-
+                hidePanel();
 		var objList = e.getPath().getArray(); //.toString();
 
 		var x1 = objList[0].lng();

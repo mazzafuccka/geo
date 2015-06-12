@@ -399,7 +399,7 @@ class GeoSets extends DataBaseCustomData {
 			$wpdb->prefix. GeoSets::DB_USERS_USER_DEVICES ." udev left join ". $wpdb->prefix. GeoSets::DB_USERS_DEVICES.
 				" devs on devs.id=udev.device_id where udev.user_id=".$current_user->ID) or die(mysql_error());
 
-		$dev_list = "<h3>Ваши устройства:</h3><table><tr><th>Device</th><th>Altitude</th><th>Battery</th></tr>";
+		$dev_list = "<h3>".__('Ваши устройства:', GeoSets::CONTENT)."</h3><table><tr><th>Device</th><th>Altitude</th><th>Battery</th></tr>";
 		$arr = "var devices_list = [";
 		for ($i=0; $i<mysql_num_rows($res); $i++)
 		{
@@ -474,22 +474,22 @@ class GeoSets extends DataBaseCustomData {
             <div class='actions'>
            		<button id='save-button'>" . __( 'Save', GeoSets::CONTENT ) . "</button>
                 <button id='delete-button'>" . __( 'Delete', GeoSets::CONTENT ) . "</button><br><br>
-		<button id='accept-btn' >Accept this area</button>
+		<button id='accept-btn' >".__('Accept this area', GeoSets::CONTENT )."</button>
             </div>
         </div>
 
   <div id='panel-path'>
             <div class='info'>
-            <h2>Path is build</h2>
+            <h2>".__('Path is build', GeoSets::CONTENT)."</h2>
             <!-- block edited information -->
             <form id='path_form' method='post' enctype='multipart/form-data'>
-                <label for='name'>Name</label>
+                <label for='name'>".__('Name', GeoSets::CONTENT)."</label>
                 <input type='text' value='' id='pname' name='name' required/>
 
 		<label for='pathtype'>Type</label><select id='ptyp' size=1 name=pathtype tyle='font-size: 12px;'>
-		<option value=1 style='font-size: 12px;'>Wait for customer and return back</option>
-		<option value=2 style='font-size: 12px;'>Drop cargo and return back</option>
-		<option value=3 style='font-size: 12px;'>Hold this position</option>
+		<option value=1 style='font-size: 12px;'>".__('Wait for customer and return back', GeoSets::CONTENT)."</option>
+		<option value=2 style='font-size: 12px;'>".__('Drop cargo and return back', GeoSets::CONTENT)."</option>
+		<option value=3 style='font-size: 12px;'>".__('Hold this position', GeoSets::CONTENT)."</option>
 		</select> 
 
                 <input id='polypath' type='hidden' name='points' value=''/>
@@ -502,9 +502,9 @@ class GeoSets extends DataBaseCustomData {
             </form>
 			</div>
             <div class='actions'>
-           	<button id='path-save-button'>Save</button>
-           	<button id='path-save-button2'>Save and Run!</button><br><br>
-                <button id='path-delete-button'>Delete</button>
+           	<button id='path-save-button'>".__('Save', GeoSets::CONTENT)."</button>
+           	<button id='path-save-button2'>".__('Save and Run!', GeoSets::CONTENT)."</button><br><br>
+                <button id='path-delete-button'>".__('Delete', GeoSets::CONTENT)."</button>
                 
             </div>
         </div>
@@ -968,7 +968,7 @@ class GeoSets extends DataBaseCustomData {
 					</tr>
 
 					<tr valign=top>
-						<th scope='row'>Pathfinding AJAX script:</th>
+						<th scope='row'><?php _e("Pathfinding AJAX script:", self::CONTENT); ?></th>
 						<td><input type=text name='path_ajax' style='width:400px;' value='<?php echo $ln[1]; ?>' ></td>
 					</tr>
 				</table>
@@ -1160,7 +1160,7 @@ class GeoSets extends DataBaseCustomData {
 	private static function init_devices_table()
 	{
 		global $wpdb;
-		print "[+] init_devices_table() called<br>\n";
+		// print "[+] init_devices_table() called<br>\n";
 		
 		$wpdb->query(
 			$wpdb->prepare("create table ".$wpdb->prefix.GeoSets::DB_USERS_DEVICES.
@@ -1191,7 +1191,7 @@ class GeoSets extends DataBaseCustomData {
 		$lnk = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die("cant connect to db");
 		$db = mysql_select_db(DB_NAME, $lnk) or die("cant select db");
     		mysql_query("set names utf8");
-		print "[+] init_user_devices_table() called<br>\n";
+		// print "[+] init_user_devices_table() called<br>\n";
 		
 		mysql_query("create table ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." (
 			id int(12) not null auto_increment,
@@ -1237,7 +1237,7 @@ class GeoSets extends DataBaseCustomData {
 			var aresure = confirm('Are you sure?');
 			return aresure;
 		}
-		</script><h2>Your routes</h2>";
+		</script><h2>".__("Your routes", self::CONTENT)."</h2>";
 		print "<table class=\"wp-list-table widefat fixed\">
 		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
 		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
@@ -1269,27 +1269,27 @@ class GeoSets extends DataBaseCustomData {
 			$typ = 1*mysql_result($res, $i, 5);
 			$stat = 1*mysql_result($res, $i, 7);
 
-			$type = "Wait client and return";
+			$type = __("Wait client and return",self::CONTENT);
 			if ($typ == 2)
-				$type = "Drop cargo and return";
+				$type = __("Drop cargo and return", self::CONTENT);
 			if ($typ == 3)
-				$type = "Hold this position";
+				$type = __("Hold this position", self::CONTENT);
 
-			$state = "Stopped";
+			$state = __("Stopped",self::CONTENT);
 			if ($stat == 0)
-				$state = "Inactive";
+				$state = __("Inactive", self::CONTENT);
 			if ($stat == 2)
-				$state = "Running";
+				$state = __("Running", self::CONTENT);
 
 			if ($stat == 2)
 			{
 				$controls = "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='stop'>\n";
-				$controls .= "<input type=submit value='Stop'></form>";
+				$controls .= "<input type=submit value='".__("Stop",self::CONTENT)."'></form>";
 			} else {
 				$controls = "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='start'>\n";
-				$controls .= "<input type=submit value='Start!'></form>";
+				$controls .= "<input type=submit value='".__("Start!",self::CONTENT)."'></form>";
 				$controls .= "<form method=POST onsubmit='return checkform();'><input type=hidden name=route_id value=$r_id ><input type=hidden name='act' value='delete'>\n";
-				$controls .= "<input type=submit value='Delete'></form>";
+				$controls .= "<input type=submit value='".__("Delete",self::CONTENT)."'></form>";
 			}
 
 			print "<tr><td>".mysql_result($res, $i, 0)."</td><td>".mysql_result($res, $i, 1)."</td><td>".mysql_result($res, $i, 2)."</td><td>";
@@ -1323,11 +1323,11 @@ class GeoSets extends DataBaseCustomData {
 			if ($a > 0)
 			{
 				mysql_query("insert into ".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES." values (NULL, ".$current_user->ID.", $a)");
-				print "[+] ok!  ";	
-			} else print "<script language=Javascript>alert('Incorrect password for device!');</script>";
+				// print "[+] ok!  ";	
+			} else print "<script language=Javascript>alert('".__("Incorrect password for device!",self::CONTENT)."');</script>";
 		}
 
-		echo "<h2>Your devices</h2>";
+		echo "<h2>".__("Your devices", self::CONTENT)."</h2>";
 		print "<table class=\"wp-list-table widefat fixed\">
 		<thead><tr><th scope=\"col\" id=\"id\" class=\"manage-column column-id\">#</th>
 		<th scope=\"col\" id=\"name\" class=\"manage-column column-name\">Name</th>
@@ -1351,7 +1351,7 @@ class GeoSets extends DataBaseCustomData {
 		// проверяем существование таблицы, если нету - создаем
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
 		{
-			print "[+] no table finded, create new one...<br>\n";
+			//print "[+] no table finded, create new one...<br>\n";
 			GeoSets::init_devices_table();	
 		}
 
@@ -1379,8 +1379,7 @@ class GeoSets extends DataBaseCustomData {
 		}
 		
 		print "</tbody></table><br><form method=POST>
-		Serial: <input type=text name=serial style='width: 70px;'> Password: <input type=text name=pass style='width: 70px;'> <input type=submit value='Add'><br>
-		</form><hr>\n";
+		Serial: <input type=text name=serial style='width: 70px;'> Password: <input type=text name=pass style='width: 70px;'> <input type=submit 				value='".__("Add",self::CONTENT)."'><br></form><hr>\n";
 
 	}
 
@@ -1586,7 +1585,7 @@ class GeoSets extends DataBaseCustomData {
 
 		?>
 
-		<div class="wrapper"><br><button id='add_dev_btn'>Add device</button>
+		<div class="wrapper"><br><button id='add_dev_btn'><?php _e("Add device", self::CONTENT); ?></button>
 		<script type='text/javascript' src='http://code.jquery.com/jquery-1.11.3.min.js' ></script>
 		<script type="text/javascript">
 
@@ -1601,11 +1600,11 @@ class GeoSets extends DataBaseCustomData {
 		</script>	
 		<div id='add_dev_form'><form method=POST>
 			<table>
-			<tr><td>Name:</td><td><input type=text name=nam></td></tr>
-			<tr><td>Serial:</td><td><input type=text name=serial></td></tr>
-			<tr><td>Password:</td><td><input type=text name=pass></td></tr>
-                        <tr><td>Descr:</td><td><textarea name=descr></textarea></td></tr></table>
-			<button >Add</button></form>
+			<tr><td><?php _e('Name:', self::CONTENT); ?></td><td><input type=text name=nam></td></tr>
+			<tr><td><?php _e('Serial:', self::CONTENT); ?></td><td><input type=text name=serial></td></tr>
+			<tr><td><?php _e('Password:', self::CONTENT); ?></td><td><input type=text name=pass></td></tr>
+                        <tr><td><?php _e('Descr:', self::CONTENT); ?></td><td><textarea name=descr></textarea></td></tr></table>
+			<button ><?php _e('Add', self::CONTENT); ?></button></form>
 			
 		</div>
 
@@ -1615,7 +1614,7 @@ class GeoSets extends DataBaseCustomData {
 		<script type='text/javascript' >
 		function checkform(frm) 
 		{
-			var aresure = confirm('Are you sure you want to delete?');
+			var aresure = confirm('".__("Are you sure you want to delete?", self::CONTENT)."');
 			return aresure;
 		}
 		</script>
@@ -1648,14 +1647,14 @@ class GeoSets extends DataBaseCustomData {
 		// проверяем существование таблицы, если нету - создаем
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_DEVICES."' ") != $wpdb->prefix.GeoSets::DB_USERS_DEVICES)
 		{
-			print "[+] no table with device list, create new one!<br>\n";
+			// print "[+] no table with device list, create new one!<br>\n";
 			GeoSets::init_devices_table();	
 		}
 
 		if($wpdb->get_var("SHOW TABLES LIKE '".$wpdb->prefix.GeoSets::DB_USERS_USER_DEVICES."' ") != 
 			$wpdb->prefix . GeoSets::DB_USERS_USER_DEVICES)
 		{
-			print "[+] no table with user_devices, create new one!<br>\n";
+			// print "[+] no table with user_devices, create new one!<br>\n";
 			GeoSets::init_user_devices_table();	
 		}
 
@@ -1669,8 +1668,8 @@ class GeoSets extends DataBaseCustomData {
 			print "</td><td>".mysql_result($res, $i, 'description')."</td><td>".mysql_result($res, $i, 'lat').", ";
 			print mysql_result($res, $i,'lng')." (alt ".mysql_result($res, $i,'alt')." meters)</td><td>".mysql_result($res, $i,'charge')."% </td>";
 			print "<td>".mysql_result($res, $i,'serial_number')."</td><td>".mysql_result($res, $i,'modify_time')."</td><td>".
-			mysql_result($res, $i,'status')."</td><td><form method=POST onsubmit='return checkform($(this).parrent);'><input type=hidden name=del_device value='$dev_id' >".
-			"<input type=submit value='Delete'></form></td></tr>\n\n";
+			mysql_result($res, $i,'status')."</td><td><form method=POST onsubmit='return checkform($(this).parrent);'>".
+			"<input type=hidden name=del_device value='$dev_id' ><input type=submit value='".__("Delete", self::CONTENT)."'></form></td></tr>\n\n";
 		}
 		
 		

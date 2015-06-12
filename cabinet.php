@@ -32,7 +32,7 @@ if ( ! $user_id ){
 				do_action('showTable_devices');
 				print "<br><br>\n\n";
 				do_action('showTable_routes');
-			}
+			} else print "$role is bad<br>\n";
 		}
 		?>
 	<br><br>
